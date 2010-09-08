@@ -79,33 +79,46 @@ $(function() {
     barrier: {
       x: canvas.width - 128,
       y: canvas.height / 2 - 128,
-      box_w: 64,
-      box_h: 48,
-      box_offset: 16,
-      color: "#b21d17",
-      dir: "d"
+      box_size: 16,
+      color: "#7b2910",
+      dir: "d",
+      matrix: [],
+      initMatrix: function() {
+        for (var i = 0; i < 16; i++) {
+          this.matrix[i] = [];
+          for (var q = 0; q < 8; q++) {
+            this.matrix[i][q] = 0;
+          }
+        }
+        for (var i = 4; i < 8; i++) { this.matrix[0][i] = 1; }
+        for (var i = 3; i < 8; i++) { this.matrix[1][i] = 1; }
+        for (var i = 2; i < 8; i++) { this.matrix[2][i] = 1; }
+        for (var i = 1; i < 7; i++) { this.matrix[3][i] = 1; }
+        for (var i = 0; i < 6; i++) { this.matrix[4][i] = 1; }
+        for (var i = 0; i < 5; i++) { this.matrix[5][i] = 1; }
+        for (var i = 0; i < 4; i++) {
+          for (var q = 0; q < 4; q++) {
+            this.matrix[i + 6][q] = 1;
+          }
+        }
+        for (var i = 0; i < 5; i++) { this.matrix[10][i] = 1; }
+        for (var i = 0; i < 6; i++) { this.matrix[11][i] = 1; }
+        for (var i = 1; i < 7; i++) { this.matrix[12][i] = 1; }
+        for (var i = 2; i < 8; i++) { this.matrix[13][i] = 1; }
+        for (var i = 3; i < 8; i++) { this.matrix[14][i] = 1; }
+        for (var i = 4; i < 8; i++) { this.matrix[15][i] = 1; }
+      }
     },
     drawQotile: function() { drawImage(this.qotile.sprite, this.qotile.x, this.qotile.y); },
     drawBarrier: function() {
-      var start_x = canvas.width - this.barrier.box_w,
-          start_y = this.barrier.y;
+      var b = this.barrier.box_size;
       ctx.fillStyle = this.barrier.color;
-      for (var i = 0; i < 5; i++) {
-        if (i) {
-          start_x -= this.barrier.box_offset;
-          start_y += this.barrier.box_offset;
+      for (var y = 0, len1 = this.barrier.matrix.length; y < len1; y++) {
+        for (var x = 0, len2 = this.barrier.matrix[y].length; x < len2; x++) {
+          if (this.barrier.matrix[y][x]) {
+            ctx.fillRect(this.barrier.x + x * b, this.barrier.y + y * b, b, b);
+          }
         }
-        ctx.fillRect(start_x, start_y, this.barrier.box_w, this.barrier.box_h);
-      }
-      start_y += this.barrier.box_h;
-      ctx.fillRect(start_x, start_y, this.barrier.box_w, this.barrier.box_offset * 2);
-      start_y += this.barrier.box_offset * 2;
-      for (var i = 0; i < 5; i++) {
-        if (i) {
-          start_x += this.barrier.box_offset;
-          start_y += this.barrier.box_offset;
-        }
-        ctx.fillRect(start_x, start_y, this.barrier.box_w, this.barrier.box_h);
       }
     },
     moveBase: function() {
@@ -140,6 +153,7 @@ $(function() {
   };
   enemy.qotile.x = canvas.width - enemy.qotile.width - 5;
   enemy.qotile.y = (canvas.height - enemy.qotile.height) / 2;
+  enemy.barrier.initMatrix();
 
   var forcefield = {
     sprite: newImage("safe_field.png"),
