@@ -26,22 +26,78 @@ $(function() {
     }
   };
   player.current_sprite = 6;
-  var qotile = {
-    sprite: newImage("qotile.gif"),
-    width: 32,
-    height: 36
+
+  var enemy = {
+    qotile: {
+      sprite: newImage("qotile.gif"),
+      width: 32,
+      height: 36
+    },
+    barrier: {
+      x: canvas.width - 128,
+      y: canvas.height / 2 - 128,
+      box_w: 64,
+      box_h: 48,
+      box_offset: 16,
+      color: "#b21d17",
+      dir: "d"
+    },
+    drawQotile: function() { drawImage(this.qotile.sprite, this.qotile.x, this.qotile.y); },
+    drawBarrier: function() {
+      var start_x = canvas.width - this.barrier.box_w,
+          start_y = this.barrier.y;
+      ctx.fillStyle = this.barrier.color;
+      for (var i = 0; i < 5; i++) {
+        if (i) {
+          start_x -= this.barrier.box_offset;
+          start_y += this.barrier.box_offset;
+        }
+        ctx.fillRect(start_x, start_y, this.barrier.box_w, this.barrier.box_h);
+      }
+      start_y += this.barrier.box_h;
+      ctx.fillRect(start_x, start_y, this.barrier.box_w, this.barrier.box_offset * 2);
+      start_y += this.barrier.box_offset * 2;
+      for (var i = 0; i < 5; i++) {
+        if (i) {
+          start_x += this.barrier.box_offset;
+          start_y += this.barrier.box_offset;
+        }
+        ctx.fillRect(start_x, start_y, this.barrier.box_w, this.barrier.box_h);
+      }
+    },
+    moveBase: function() {
+      if (this.barrier.dir === "d") {
+        if (this.barrier.y < canvas.height / 2 - 64) {
+          this.barrier.y++;
+          this.qotile.y++;
+        }
+        else {
+          this.barrier.y--;
+          this.qotile.y--;
+          this.barrier.dir = "u";
+        }
+      }
+      else {
+        if (this.barrier.y > canvas.height / 2 - 192) {
+          this.barrier.y--;
+          this.qotile.y--;
+        }
+        else {
+          this.barrier.y++;
+          this.qotile.y++
+          this.barrier.dir = "d";
+        }
+      }
+    },
+    draw: function() {
+      this.drawQotile();
+      this.drawBarrier();
+      this.moveBase();
+    }
   };
-  qotile.x = canvas.width - qotile.width - 5;
-  qotile.y = (canvas.height - qotile.height) / 2;
-  var barrier = {
-    x: canvas.width - 128,
-    y: canvas.height / 2 - 128,
-    box_w: 64,
-    box_h: 48,
-    box_offset: 16,
-    color: "#b21d17",
-    dir: "d"
-  };
+  enemy.qotile.x = canvas.width - enemy.qotile.width - 5;
+  enemy.qotile.y = (canvas.height - enemy.qotile.height) / 2;
+
   var forcefield = {
     sprite: newImage("safe_field.png"),
     width: 41,
@@ -74,7 +130,7 @@ $(function() {
   function run() {
     clearCanvas();
     drawPlayer();
-    drawBase();
+    enemy.draw();
     drawForcefield();
     if (player.shot.fired) {
       shot();
@@ -132,12 +188,6 @@ $(function() {
     drawImage(player.sprites[player.current_sprite], player.x, player.y);
   }
 
-  function drawBase() {
-    drawqotile();
-    drawBarrier();
-    moveBase();
-  }
-
   function drawForcefield() {
     drawImage(forcefield.sprite, forcefield.x, -Math.round(Math.random() * (forcefield.height - canvas.height) / 2));
   }
@@ -147,58 +197,6 @@ $(function() {
       ctx.drawImage(img, x, y);
     };
     img.complete ? doIt() : img.onload = doIt;
-  }
-
-  function drawqotile() {
-    drawImage(qotile.sprite, qotile.x, qotile.y);
-  }
-
-  function drawBarrier() {
-    var start_x = canvas.width - barrier.box_w,
-        start_y = barrier.y;
-    ctx.fillStyle = barrier.color;
-    for (var i = 0; i < 5; i++) {
-      if (i) {
-        start_x -= barrier.box_offset;
-        start_y += barrier.box_offset;
-      }
-      ctx.fillRect(start_x, start_y, barrier.box_w, barrier.box_h);
-    }
-    start_y += barrier.box_h;
-    ctx.fillRect(start_x, start_y, barrier.box_w, barrier.box_offset * 2);
-    start_y += barrier.box_offset * 2;
-    for (var i = 0; i < 5; i++) {
-      if (i) {
-        start_x += barrier.box_offset;
-        start_y += barrier.box_offset;
-      }
-      ctx.fillRect(start_x, start_y, barrier.box_w, barrier.box_h);
-    }
-  }
-
-  function moveBase() {
-    if (barrier.dir === "d") {
-      if (barrier.y < canvas.height / 2 - 64) {
-        barrier.y++;
-        qotile.y++;
-      }
-      else {
-        barrier.y--;
-        qotile.y--;
-        barrier.dir = "u";
-      }
-    }
-    else {
-      if (barrier.y > canvas.height / 2 - 192) {
-        barrier.y--;
-        qotile.y--;
-      }
-      else {
-        barrier.y++;
-        qotile.y++
-        barrier.dir = "d";
-      }
-    }
   }
 
   function newImage(src) {
