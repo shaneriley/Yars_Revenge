@@ -23,6 +23,49 @@ $(function() {
       height: 4,
       color: "#ffffff",
       fired: false
+    },
+    draw: function() {
+      var max_x = canvas.width - this.width,
+          max_y = canvas.height - this.height;
+      if (key[37]) {
+        this.current_sprite = this.current_sprite % 2 ? 0 : 1;
+      }
+      if (key[38]) {
+        this.current_sprite = this.current_sprite % 2 ? 2 : 3;
+      }
+      if (key[39]) {
+        this.current_sprite = this.current_sprite % 2 ? 4 : 5;
+      }
+      if (key[40]) {
+        this.current_sprite = this.current_sprite % 2 ? 6 : 7;
+      }
+      this.x -= key[37] && this.x > 0 ? this.speed : 0;
+      this.x += key[39] && this.x < max_x ? this.speed : 0;
+      this.y -= key[38] && this.y > 0 ? this.speed : 0;
+      this.y += key[40] && this.y < max_y ? this.speed : 0;
+      this.x > max_x ? this.x = max_x : 1;
+      this.x < 0 ? this.x = 0 : 1;
+      this.y > max_y ? this.y = max_y : 1;
+      this.y < 0 ? this.y = 0 : 1;
+      drawImage(this.sprites[player.current_sprite], this.x, this.y);
+    },
+    drawShot: function() {
+      ctx.fillStyle = this.shot.color;
+      if (!this.shot.fired) {
+        this.shot.fired = true;
+        this.shot.x = this.x + this.width;
+        this.shot.y = this.y + this.height / 2 - 2;
+      }
+      else if (this.shot.x <= canvas.width - 4) {
+        this.shot.fired = true;
+        this.shot.x += 8;
+      }
+      else {
+        this.shot.fired = false;
+      }
+      if (this.shot.fired) {
+        ctx.fillRect(this.shot.x, this.shot.y, this.shot.width, this.shot.height);
+      }
     }
   };
   player.current_sprite = 6;
@@ -102,14 +145,17 @@ $(function() {
     sprite: newImage("safe_field.png"),
     width: 41,
     height: 2671,
-    x: 185
+    x: 185,
+    draw: function() {
+      drawImage(this.sprite, this.x, -Math.round(Math.random() * (this.height - canvas.height) / 2));
+    }
   };
   var key = [];
   var game = setInterval(function() { run(); }, 34);
   this.onkeydown = this.onkeyup = function(e) {
     key[e.which] = (e.type == "keydown");
     if (e.type == "keydown" && e.keyCode == 32 && !player.shot.fired) {
-      shot();
+      player.drawShot();
     }
     if (e.type == "keydown" && e.keyCode == 80) {
       if (!this.game_paused) {
@@ -129,11 +175,11 @@ $(function() {
 
   function run() {
     clearCanvas();
-    drawPlayer();
+    player.draw();
     enemy.draw();
-    drawForcefield();
+    forcefield.draw();
     if (player.shot.fired) {
-      shot();
+      player.drawShot();
     }
   }
 
@@ -141,55 +187,6 @@ $(function() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
-  function shot() {
-    ctx.fillStyle = player.shot.color;
-    if (!player.shot.fired) {
-      player.shot.fired = true;
-      player.shot.x = player.x + player.width;
-      player.shot.y = player.y + player.height / 2 - 2;
-    }
-    else if (player.shot.x <= canvas.width - 4) {
-      player.shot.fired = true;
-      player.shot.x += 8;
-    }
-    else {
-      player.shot.fired = false;
-    }
-    if (player.shot.fired) {
-      ctx.fillRect(player.shot.x, player.shot.y, player.shot.width, player.shot.height);
-    }
-  }
-
-  function drawPlayer() {
-    var max_x = canvas.width - player.width,
-        max_y = canvas.height - player.height;
-    if (key[37]) {
-      player.current_sprite = player.current_sprite % 2 ? 0 : 1;
-    }
-    if (key[38]) {
-      player.current_sprite = player.current_sprite % 2 ? 2 : 3;
-    }
-    if (key[39]) {
-      player.current_sprite = player.current_sprite % 2 ? 4 : 5;
-    }
-    if (key[40]) {
-      player.current_sprite = player.current_sprite % 2 ? 6 : 7;
-    }
-    player.x -= key[37] && player.x > 0 ? player.speed : 0;
-    player.x += key[39] && player.x < max_x ? player.speed : 0;
-    player.y -= key[38] && player.y > 0 ? player.speed : 0;
-    player.y += key[40] && player.y < max_y ? player.speed : 0;
-    player.x > max_x ? player.x = max_x : 1;
-    player.x < 0 ? player.x = 0 : 1;
-    player.y > max_y ? player.y = max_y : 1;
-    player.y < 0 ? player.y = 0 : 1;
-    drawImage(player.sprites[player.current_sprite], player.x, player.y);
-  }
-
-  function drawForcefield() {
-    drawImage(forcefield.sprite, forcefield.x, -Math.round(Math.random() * (forcefield.height - canvas.height) / 2));
   }
 
   function drawImage(img, x, y) {
