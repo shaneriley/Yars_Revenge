@@ -50,6 +50,7 @@ $(function() {
       drawImage(this.sprites[player.current_sprite], this.x, this.y);
     },
     drawShot: function() {
+      var e = enemy.barrier;
       ctx.fillStyle = this.shot.color;
       if (!this.shot.fired) {
         this.shot.fired = true;
@@ -66,6 +67,20 @@ $(function() {
       if (this.shot.fired) {
         ctx.fillRect(this.shot.x, this.shot.y, this.shot.width, this.shot.height);
       }
+      if (this.shot.y >= e.y && this.shot.y + this.shot.height <= e.y + e.height) {
+        if (this.shot.x + this.shot.width >= e.x) {
+          var x = this.shot.x + this.shot.width - e.x,
+              y = this.shot.y - e.y;
+          x = Math.floor((x + (x % e.box_size)) / e.box_size);
+          y = Math.floor((y + (y % e.box_size)) / e.box_size);
+          if (y < e.matrix.length && x < e.matrix[y].length) {
+            if (e.matrix[y][x] === 1) {
+              e.matrix[y][x] = 0;
+              this.shot.fired = false;
+            }
+          }
+        }
+      }
     }
   };
   player.current_sprite = 6;
@@ -79,6 +94,7 @@ $(function() {
     barrier: {
       x: canvas.width - 128,
       y: canvas.height / 2 - 128,
+      height: 256,
       box_size: 16,
       color: "#7b2910",
       dir: "d",
