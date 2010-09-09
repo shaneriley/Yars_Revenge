@@ -22,6 +22,7 @@ $(function() {
       width: 4,
       height: 4,
       color: "#ffffff",
+      speed: 16,
       fired: false
     },
     draw: function() {
@@ -59,7 +60,7 @@ $(function() {
       }
       else if (this.shot.x <= canvas.width - 4) {
         this.shot.fired = true;
-        this.shot.x += 8;
+        this.shot.x += this.shot.speed;
       }
       else {
         this.shot.fired = false;
@@ -77,6 +78,10 @@ $(function() {
             if (e.matrix[y][x] === 1) {
               e.matrix[y][x] = 0;
               this.shot.fired = false;
+              if (x < e.matrix[y].length - 1 && y < e.matrix.length - 1) { e.matrix[y + 1][x + 1] = 0; }
+              if (y - 1 >= 0 && x < e.matrix[y - 1].length - 1) { e.matrix[y - 1][x + 1] = 0; }
+              if (x < e.matrix[y].length - 1) { e.matrix[y][x + 1] = 0; }
+              if (x < e.matrix[y].length - 2) { e.matrix[y][x + 2] = 0; }
             }
           }
         }
@@ -140,23 +145,23 @@ $(function() {
     moveBase: function() {
       if (this.barrier.dir === "d") {
         if (this.barrier.y < canvas.height / 2 - 64) {
-          this.barrier.y++;
-          this.qotile.y++;
+          this.barrier.y += 2;
+          this.qotile.y += 2;
         }
         else {
-          this.barrier.y--;
-          this.qotile.y--;
+          this.barrier.y -= 2;
+          this.qotile.y -= 2;
           this.barrier.dir = "u";
         }
       }
       else {
         if (this.barrier.y > canvas.height / 2 - 192) {
-          this.barrier.y--;
-          this.qotile.y--;
+          this.barrier.y -= 2;
+          this.qotile.y -= 2;
         }
         else {
-          this.barrier.y++;
-          this.qotile.y++
+          this.barrier.y += 2;
+          this.qotile.y += 2;
           this.barrier.dir = "d";
         }
       }
