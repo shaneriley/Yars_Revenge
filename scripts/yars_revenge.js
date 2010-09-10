@@ -135,8 +135,7 @@ $(function() {
     },
     drawQotile: function() {
       var q = this.qotile,
-          r = function(x, y, w, h) { ctx.fillRect(x, y, w, h); },
-          c = {};
+          r = function(x, y, w, h) { ctx.fillRect(x, y, w, h); };
       ctx.fillStyle = q.color;
       r(q.x + 16, q.y, 16, 4);
       r(q.x + 12, q.y + 4, 8, 4);
@@ -147,15 +146,8 @@ $(function() {
       r(q.x + 12, q.y + 28, 8, 4);
       r(q.x + 16, q.y + 32, 16, 4);
       r(q.x + 24, q.y, 8, 36);
-      c.r = Math.round(Math.sin(q.frequency * q.len) * 127 + 128);
-      c.g = Math.round(Math.sin(q.frequency * q.len + 2) * 127 + 128);
-      c.b = Math.round(Math.sin(q.frequency * q.len + 4) * 127 + 128);
-      for (var i in c) {
-        c[i] = c[i].toString(16);
-        c[i].length < 2 ? c[i] = "0" + c[i] : 0;
-      }
+      q.color = generateColor(q.frequency, q.len);
       (q.len > 49) ? q.len = 0 : q.len++;
-      q.color = "#" + c.r + c.g + c.b;
     },
     drawBarrier: function() {
       var b = this.barrier.box_size;
@@ -261,5 +253,18 @@ $(function() {
     var img = new Image();
     img.src = "images/" + src;
     return img;
+  }
+
+  function generateColor(freq, len) {
+    var c = {}, hex = "#";
+    c.r = Math.round(Math.sin(freq * len) * 127 + 128);
+    c.g = Math.round(Math.sin(freq * len + 2) * 127 + 128);
+    c.b = Math.round(Math.sin(freq * len + 4) * 127 + 128);
+    for (var i in c) {
+      c[i] = c[i].toString(16);
+      c[i].length < 2 ? c[i] = "0" + c[i] : 0;
+      hex += c[i];
+    }
+    return hex;
   }
 });
