@@ -72,7 +72,8 @@ $(function() {
         if (this.shot.x + this.shot.width >= e.x) {
           var x = this.shot.x + this.shot.width - e.x,
               y = this.shot.y - e.y;
-          x = Math.floor((x + (x % e.box_size)) / e.box_size);
+          x = (x * 2 - 1 < e.box_size * 2) ? 0 : Math.floor((x + (x % e.box_size) + 1) / e.box_size);
+          //x = Math.floor((x + (x % e.box_size) + 1) / e.box_size);
           y = Math.floor((y + (y % e.box_size)) / e.box_size);
           if (y < e.matrix.length && x < e.matrix[y].length) {
             if (e.matrix[y][x] === 1) {
@@ -92,9 +93,11 @@ $(function() {
 
   var enemy = {
     qotile: {
-      sprite: newImage("qotile.gif"),
       width: 32,
-      height: 36
+      height: 36,
+      color: "#fff456",
+      frequency: .1,
+      len: 0
     },
     barrier: {
       x: canvas.width - 128,
@@ -130,7 +133,30 @@ $(function() {
         for (var i = 4; i < 8; i++) { this.matrix[15][i] = 1; }
       }
     },
-    drawQotile: function() { drawImage(this.qotile.sprite, this.qotile.x, this.qotile.y); },
+    drawQotile: function() {
+      var q = this.qotile,
+          r = function(x, y, w, h) { ctx.fillRect(x, y, w, h); },
+          c = {};
+      ctx.fillStyle = q.color;
+      r(q.x + 16, q.y, 16, 4);
+      r(q.x + 12, q.y + 4, 8, 4);
+      r(q.x + 8, q.y + 8, 8, 4);
+      r(q.x, q.y + 12, 12, 12);
+      r(q.x + 12, q.y + 16, 12, 4);
+      r(q.x + 8, q.y + 24, 8, 4);
+      r(q.x + 12, q.y + 28, 8, 4);
+      r(q.x + 16, q.y + 32, 16, 4);
+      r(q.x + 24, q.y, 8, 36);
+      c.r = Math.round(Math.sin(q.frequency * q.len) * 127 + 128);
+      c.g = Math.round(Math.sin(q.frequency * q.len + 2) * 127 + 128);
+      c.b = Math.round(Math.sin(q.frequency * q.len + 4) * 127 + 128);
+      for (var i in c) {
+        c[i] = c[i].toString(16);
+        c[i].length < 2 ? c[i] = "0" + c[i] : 0;
+      }
+      (q.len > 49) ? q.len = 0 : q.len++;
+      q.color = "#" + c.r + c.g + c.b;
+    },
     drawBarrier: function() {
       var b = this.barrier.box_size;
       ctx.fillStyle = this.barrier.color;
@@ -189,10 +215,10 @@ $(function() {
   var game = setInterval(function() { run(); }, 34);
   this.onkeydown = this.onkeyup = function(e) {
     key[e.which] = (e.type == "keydown");
-    if (e.type == "keydown" && e.keyCode == 32 && !player.shot.fired) {
+    if (e.type === "keydown" && e.keyCode === 32 && !player.shot.fired) {
       player.drawShot();
     }
-    if (e.type == "keydown" && e.keyCode == 80) {
+    if (e.type === "keydown" && e.keyCode === 80) {
       if (!this.game_paused) {
         this.game_paused = true;
         clearInterval(game);
