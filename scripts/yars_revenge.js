@@ -73,10 +73,10 @@ $(function() {
           var x = this.shot.x + this.shot.width - e.x,
               y = this.shot.y - e.y;
           x = (x * 2 - 1 < e.box_size * 2) ? 0 : Math.floor((x + (x % e.box_size) + 1) / e.box_size);
-          //x = Math.floor((x + (x % e.box_size) + 1) / e.box_size);
           y = Math.floor((y + (y % e.box_size)) / e.box_size);
           if (y < e.matrix.length && x < e.matrix[y].length) {
-            if (e.matrix[y][x] === 1) {
+            if (e.matrix[y][x - 1]) { x--; }
+            if (e.matrix[y][x]) {
               e.matrix[y][x] = 0;
               this.shot.fired = false;
               if (x < e.matrix[y].length - 1 && y < e.matrix.length - 1) { e.matrix[y + 1][x + 1] = 0; }
