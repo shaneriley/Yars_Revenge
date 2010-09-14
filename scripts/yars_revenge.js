@@ -141,8 +141,11 @@ $(function() {
       speed: 1,
       draw: function() {
         ctx.fillStyle = enemy.qotile.color;
+        ctx.globalCompositeOperation = "lighter";
         ctx.fillRect(this.x, this.y, this.width, this.height);
-        this.x -= this.speed;
+        this.x -= (player.x < this.x) ? this.speed : -this.speed;
+        this.y -= (player.y + player.height / 2 < this.y) ? this.speed : -this.speed;
+        ctx.globalCompositeOperation = "source-over";
       }
     },
     drawQotile: function() {
