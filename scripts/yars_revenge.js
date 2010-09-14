@@ -18,6 +18,7 @@ $(function() {
     speed: 12,
     x: 40,
     y: (canvas.height - 32) / 2,
+    score: 0,
     shot: {
       width: 4,
       height: 4,
@@ -78,11 +79,24 @@ $(function() {
             if (e.matrix[y][x - 1]) { x--; }
             if (e.matrix[y][x]) {
               e.matrix[y][x] = 0;
+              this.score += e.points;
               this.shot.fired = false;
-              if (x < e.matrix[y].length - 1 && y < e.matrix.length - 1) { e.matrix[y + 1][x + 1] = 0; }
-              if (y - 1 >= 0 && x < e.matrix[y - 1].length - 1) { e.matrix[y - 1][x + 1] = 0; }
-              if (x < e.matrix[y].length - 1) { e.matrix[y][x + 1] = 0; }
-              if (x < e.matrix[y].length - 2) { e.matrix[y][x + 2] = 0; }
+              if (x < e.matrix[y].length - 1 && y < e.matrix.length - 1) {
+                e.matrix[y + 1][x + 1] = 0;
+                this.score += e.points;
+              }
+              if (y - 1 >= 0 && x < e.matrix[y - 1].length - 1) {
+                e.matrix[y - 1][x + 1] = 0;
+                this.score += e.points;
+              }
+              if (x < e.matrix[y].length - 1) {
+                e.matrix[y][x + 1] = 0;
+                this.score += e.points;
+              }
+              if (x < e.matrix[y].length - 2) {
+                e.matrix[y][x + 2] = 0;
+                this.score += e.points;
+              }
             }
           }
         }
@@ -97,7 +111,10 @@ $(function() {
       height: 36,
       color: "#fff456",
       frequency: .1,
-      len: 0
+      len: 0,
+      points: 1000,
+      swirl_points: 2000,
+      swirl_airborne_points: 6000
     },
     barrier: {
       x: canvas.width - 128,
@@ -107,6 +124,8 @@ $(function() {
       color: "#7b2910",
       dir: "d",
       matrix: [],
+      points: 69,
+      chomp_points: 169,
       initMatrix: function() {
         for (var i = 0; i < 16; i++) {
           this.matrix[i] = [];
@@ -251,9 +270,7 @@ $(function() {
     player.draw();
     enemy.draw();
     forcefield.draw();
-    if (player.shot.fired) {
-      player.drawShot();
-    }
+    if (player.shot.fired) { player.drawShot(); }
   }
 
   function clearCanvas() {
