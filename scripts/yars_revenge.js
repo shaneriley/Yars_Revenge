@@ -43,12 +43,12 @@ $(function() {
       }
       this.x -= key[37] && this.x > 0 ? this.speed : 0;
       this.x += key[39] && this.x < max_x ? this.speed : 0;
-      this.y -= key[38] && this.y > 0 ? this.speed : 0;
-      this.y += key[40] && this.y < max_y ? this.speed : 0;
+      this.y -= key[38] && this.y >= 0 ? this.speed : 0;
+      this.y += key[40] && this.y <= max_y ? this.speed : 0;
       this.x > max_x ? this.x = max_x : 1;
       this.x < 0 ? this.x = 0 : 1;
-      this.y > max_y ? this.y = max_y : 1;
-      this.y < 0 ? this.y = 0 : 1;
+      this.y > max_y ? this.y = 0 : 1;
+      this.y < 0 ? this.y = max_y : 1;
       drawImage(this.sprites[player.current_sprite], this.x, this.y);
     },
     drawShot: function() {
