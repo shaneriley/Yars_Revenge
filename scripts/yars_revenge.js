@@ -18,6 +18,7 @@ $(function() {
     speed: 12,
     x: 40,
     y: (canvas.height - 32) / 2,
+    current_sprite: 6,
     score: 0,
     shot: {
       width: 4,
@@ -29,29 +30,32 @@ $(function() {
     draw: function() {
       var max_x = canvas.width - this.width,
           max_y = canvas.height - this.height;
-      if (key[37]) {
-        this.current_sprite = this.current_sprite % 2 ? 0 : 1;
+      if (!this.dead) {
+        if (key[37]) {
+          this.current_sprite = this.current_sprite % 2 ? 0 : 1;
+        }
+        if (key[38]) {
+          this.current_sprite = this.current_sprite % 2 ? 2 : 3;
+        }
+        if (key[39]) {
+          this.current_sprite = this.current_sprite % 2 ? 4 : 5;
+        }
+        if (key[40]) {
+          this.current_sprite = this.current_sprite % 2 ? 6 : 7;
+        }
+        this.x -= key[37] && this.x > 0 ? this.speed : 0;
+        this.x += key[39] && this.x < max_x ? this.speed : 0;
+        this.y -= key[38] && this.y >= 0 ? this.speed : 0;
+        this.y += key[40] && this.y <= max_y ? this.speed : 0;
+        this.x > max_x ? this.x = max_x : 1;
+        this.x < 0 ? this.x = 0 : 1;
+        this.y > max_y ? this.y = 0 : 1;
+        this.y < 0 ? this.y = max_y : 1;
       }
-      if (key[38]) {
-        this.current_sprite = this.current_sprite % 2 ? 2 : 3;
-      }
-      if (key[39]) {
-        this.current_sprite = this.current_sprite % 2 ? 4 : 5;
-      }
-      if (key[40]) {
-        this.current_sprite = this.current_sprite % 2 ? 6 : 7;
-      }
-      this.x -= key[37] && this.x > 0 ? this.speed : 0;
-      this.x += key[39] && this.x < max_x ? this.speed : 0;
-      this.y -= key[38] && this.y >= 0 ? this.speed : 0;
-      this.y += key[40] && this.y <= max_y ? this.speed : 0;
-      this.x > max_x ? this.x = max_x : 1;
-      this.x < 0 ? this.x = 0 : 1;
-      this.y > max_y ? this.y = 0 : 1;
-      this.y < 0 ? this.y = max_y : 1;
       drawImage(this.sprites[player.current_sprite], this.x, this.y);
     },
     drawShot: function() {
+      if (this.dead) { return; }
       var e = enemy.barrier;
       ctx.fillStyle = this.shot.color;
       if (!this.shot.fired) {
@@ -101,9 +105,31 @@ $(function() {
           }
         }
       }
+    },
+    kill: function() {
+      this.dead = true;
+      this.lives--;
+      this.shot.fired = false;
+      if (this.lives === 0) {
+        gameOver();
+      }
+      var i = 8;
+      var flash = function() {
+        this.current_sprite >= 6 ? this.current_sprite -= 6 : this.current_sprite += 2;
+        if (i > 0) {
+          i--;
+          var q = setTimeout(function() { flash.apply(player); }, 34);
+        }
+        else {
+          this.dead = false;
+          this.current_sprite = 6;
+          this.x = 40;
+          this.y = (canvas.height - 32) / 2;
+        }
+      };
+      flash.apply(this);
     }
   };
-  player.current_sprite = 6;
 
   var enemy = {
     qotile: {
@@ -165,6 +191,16 @@ $(function() {
         this.x -= (player.x < this.x) ? this.speed : -this.speed;
         this.y -= (player.y + player.height / 2 < this.y) ? this.speed : -this.speed;
         ctx.globalCompositeOperation = "source-over";
+        this.checkCollision();
+      },
+      checkCollision: function() {
+        if (!player.dead) {
+          if (this.x < player.x + player.width &&
+            this.x + this.width > player.x && this.y < player.y + player.height &&
+            this.y + this.height > player.y) {
+            player.kill();
+          }
+        }
       }
     },
     drawQotile: function() {
@@ -243,7 +279,7 @@ $(function() {
   titleScreen();
   $(document).bind("keydown keyup", function(e) {
     key[e.which] = (e.type == "keydown");
-    if (e.type === "keydown" && e.keyCode === 32 && !player.shot.fired && game != null) {
+    if (e.type === "keydown" && e.keyCode === 32 && !player.shot.fired && game != null && !player.dead) {
       player.drawShot();
     }
     if (e.type === "keydown" && e.keyCode === 80) {
@@ -266,6 +302,20 @@ $(function() {
       }
     }
   });
+
+  function gameOver() {
+    clearInterval(game);
+    setTimeout(function() {
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = "bold 26px monospace";
+      ctx.textAlign = "center";
+      ctx.fillStyle = "white";
+      ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 25);
+      ctx.font = "bold 18px monospace";
+      ctx.fillText("Score: " + player.score, canvas.width / 2, canvas.height / 2 + 10);
+    }, 40);
+  }
 
   function titleScreen() {
     var copyright = newImage("copyright.gif");
