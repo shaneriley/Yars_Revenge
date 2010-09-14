@@ -238,17 +238,19 @@ $(function() {
       drawImage(this.sprite, this.x, -Math.round(Math.random() * (this.height - canvas.height) / 2));
     }
   };
-  var key = [];
-  var game = setInterval(function() { run(); }, 34);
-  this.onkeydown = this.onkeyup = function(e) {
+  var key = [],
+      game;
+  titleScreen();
+  $(document).bind("keydown keyup", function(e) {
     key[e.which] = (e.type == "keydown");
-    if (e.type === "keydown" && e.keyCode === 32 && !player.shot.fired) {
+    if (e.type === "keydown" && e.keyCode === 32 && !player.shot.fired && game != null) {
       player.drawShot();
     }
     if (e.type === "keydown" && e.keyCode === 80) {
       if (!this.game_paused) {
         this.game_paused = true;
         clearInterval(game);
+        game = null;
         ctx.fillStyle = "#0066cc";
         ctx.globalAlpha = .7;
         ctx.fillRect(canvas.width / 2 - 80, canvas.height / 2 - 27, 160, 40);
@@ -263,7 +265,22 @@ $(function() {
         game = setInterval(function() { run(); }, 34);
       }
     }
-  };
+  });
+
+  function titleScreen() {
+    var copyright = newImage("copyright.gif");
+    copyright.onload = function() {
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(this, canvas.width / 2 - 80, 92);
+    };
+    $(document).bind("keypress.start_game", function(e) {
+      if (e.keyCode === 32) {
+        $(this).unbind("keypress.start_game");
+        game = setInterval(function() { run(); }, 34);
+      }
+    });
+  }
 
   function run() {
     clearCanvas();
