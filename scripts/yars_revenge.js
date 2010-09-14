@@ -227,6 +227,10 @@ $(function() {
       if (!this.game_paused) {
         this.game_paused = true;
         clearInterval(game);
+        ctx.fillStyle = "#0066cc";
+        ctx.globalAlpha = .7;
+        ctx.fillRect(canvas.width / 2 - 80, canvas.height / 2 - 27, 160, 40);
+        ctx.globalAlpha = 1;
         ctx.font = "bold 26px monospace";
         ctx.textAlign = "center";
         ctx.fillStyle = "white";
