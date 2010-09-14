@@ -133,6 +133,18 @@ $(function() {
         for (var i = 4; i < 8; i++) { this.matrix[15][i] = 1; }
       }
     },
+    shot: {
+      width: 16,
+      height: 4,
+      x: canvas.width - 90,
+      y: canvas.height / 2,
+      speed: 1,
+      draw: function() {
+        ctx.fillStyle = enemy.qotile.color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+        this.x -= this.speed;
+      }
+    },
     drawQotile: function() {
       var q = this.qotile,
           r = function(x, y, w, h) { ctx.fillRect(x, y, w, h); };
@@ -188,6 +200,7 @@ $(function() {
       this.drawQotile();
       this.drawBarrier();
       this.moveBase();
+      this.shot.draw();
     }
   };
   enemy.qotile.x = canvas.width - enemy.qotile.width - 5;
