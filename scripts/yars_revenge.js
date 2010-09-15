@@ -148,7 +148,23 @@ $(function() {
       len: 0,
       points: 1000,
       swirl_points: 2000,
-      swirl_airborne_points: 6000
+      swirl_airborne_points: 6000,
+      draw: function() {
+        var q = this,
+            r = function(x, y, w, h) { ctx.fillRect(x, y, w, h); };
+        ctx.fillStyle = q.color;
+        r(q.x + 16, q.y, 16, 4);
+        r(q.x + 12, q.y + 4, 8, 4);
+        r(q.x + 8, q.y + 8, 8, 4);
+        r(q.x, q.y + 12, 12, 12);
+        r(q.x + 12, q.y + 16, 12, 4);
+        r(q.x + 8, q.y + 24, 8, 4);
+        r(q.x + 12, q.y + 28, 8, 4);
+        r(q.x + 16, q.y + 32, 16, 4);
+        r(q.x + 24, q.y, 8, 36);
+        q.color = generateColor(q.frequency, q.len);
+        (q.len > 49) ? q.len = 0 : q.len++;
+      }
     },
     barrier: {
       x: canvas.width - 128,
@@ -205,6 +221,17 @@ $(function() {
             }
           }
         }
+      },
+      draw: function() {
+        var b = this.box_size;
+        ctx.fillStyle = this.color;
+        for (var y = 0, len1 = this.matrix.length; y < len1; y++) {
+          for (var x = 0, len2 = this.matrix[y].length; x < len2; x++) {
+            if (this.matrix[y][x]) {
+              ctx.fillRect(this.x + x * b, this.y + y * b, b, b);
+            }
+          }
+        }
       }
     },
     shot: {
@@ -228,33 +255,6 @@ $(function() {
             this.x + this.width > player.x && this.y < player.y + player.height &&
             this.y + this.height > player.y) {
               player.kill();
-          }
-        }
-      }
-    },
-    drawQotile: function() {
-      var q = this.qotile,
-          r = function(x, y, w, h) { ctx.fillRect(x, y, w, h); };
-      ctx.fillStyle = q.color;
-      r(q.x + 16, q.y, 16, 4);
-      r(q.x + 12, q.y + 4, 8, 4);
-      r(q.x + 8, q.y + 8, 8, 4);
-      r(q.x, q.y + 12, 12, 12);
-      r(q.x + 12, q.y + 16, 12, 4);
-      r(q.x + 8, q.y + 24, 8, 4);
-      r(q.x + 12, q.y + 28, 8, 4);
-      r(q.x + 16, q.y + 32, 16, 4);
-      r(q.x + 24, q.y, 8, 36);
-      q.color = generateColor(q.frequency, q.len);
-      (q.len > 49) ? q.len = 0 : q.len++;
-    },
-    drawBarrier: function() {
-      var b = this.barrier.box_size;
-      ctx.fillStyle = this.barrier.color;
-      for (var y = 0, len1 = this.barrier.matrix.length; y < len1; y++) {
-        for (var x = 0, len2 = this.barrier.matrix[y].length; x < len2; x++) {
-          if (this.barrier.matrix[y][x]) {
-            ctx.fillRect(this.barrier.x + x * b, this.barrier.y + y * b, b, b);
           }
         }
       }
@@ -284,8 +284,8 @@ $(function() {
       }
     },
     draw: function() {
-      this.drawQotile();
-      this.drawBarrier();
+      this.qotile.draw();
+      this.barrier.draw();
       this.moveBase();
       this.shot.draw();
     }
