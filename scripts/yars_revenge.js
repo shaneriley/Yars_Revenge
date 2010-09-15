@@ -346,12 +346,26 @@ $(function() {
     drawNumbers(score);
     y += 52;
     drawNumbers(lives);
-    if (tally.lives > 0) {
-      $(document).bind("keypress.next_round", function(e) {
-        $(this).unbind("keypress.next_round");
-        game = setInterval(function() { run(); }, 34);
-      });
-    }
+    $(document).bind("keypress.next_round", function(e) {
+      if (tally.lives === 0) {
+        resetGame();
+      }
+      $(this).unbind("keypress.next_round");
+      game = setInterval(function() { run(); }, 34);
+    });
+  }
+
+  function resetGame() {
+    tally.lives = 3;
+    tally.score = 0;
+    player.x = 40;
+    player.y = (canvas.height - 32) / 2;
+    player.current_sprite = 6;
+    player.shot.fired = false;
+    player.dead = false;
+    enemy.barrier.initMatrix();
+    enemy.shot.x = canvas.width - 90;
+    enemy.shot.y = canvas.height / 2;
   }
 
   function titleScreen() {
