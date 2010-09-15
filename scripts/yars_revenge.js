@@ -155,7 +155,7 @@ $(function() {
         height: 32,
         swirling: false,
         attacking: false,
-        next_attack: 10,//100 + Math.floor(Math.random() * 200),
+        next_attack: 80 + Math.floor(Math.random() * 150),
         draw: function() {
           ctx.drawImage(this.sprite, 0, (enemy.qotile.countdown % 4 > 1 ? 0 : 32), 32, 32, enemy.qotile.x, enemy.qotile.y + 2, 32, 32);
           if (!this.attacking) {
