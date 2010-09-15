@@ -203,6 +203,14 @@ $(function() {
       },
       checkCollision: function() {
         var p = player;
+        var adjustX = function() {
+          if (p.current_sprite < 2) {
+            p.x = b_x + this.box_size;
+          }
+          else if (p.current_sprite > 3 && p.current_sprite < 6) {
+            p.x = b_x - p.width;
+          }
+        };
         for (var y = 0, y_len = this.matrix.length; y < y_len; y++) {
           for (var x = 0, x_len = this.matrix[y].length; x < x_len; x++) {
             if (this.matrix[y][x]) {
@@ -250,11 +258,15 @@ $(function() {
         this.checkCollision();
       },
       checkCollision: function() {
-        if (!player.dead) {
-          if (this.x < player.x + player.width &&
-            this.x + this.width > player.x && this.y < player.y + player.height &&
-            this.y + this.height > player.y) {
-              player.kill();
+        var p = player,
+            f = forcefield;
+        if (!p.dead) {
+          if (!((p.x > f.x && p.x < f.x + f.width) || (p.x + p.width > f.x && p.x + p.width < f.x + f.width))) {
+            if (this.x < p.x + p.width &&
+              this.x + this.width > p.x && this.y < p.y + p.height &&
+              this.y + this.height > p.y) {
+                p.kill();
+            }
           }
         }
       }
@@ -296,7 +308,7 @@ $(function() {
 
   var forcefield = {
     sprite: newImage("safe_field.png"),
-    width: 41,
+    width: 112,
     height: 2671,
     x: 185,
     draw: function() {
