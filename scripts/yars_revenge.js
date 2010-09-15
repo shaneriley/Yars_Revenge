@@ -50,6 +50,7 @@ $(function() {
         this.y > max_y ? this.y = 0 : 1;
         this.y < 0 ? this.y = max_y : 1;
       }
+      enemy.barrier.checkCollision();
       drawImage(this.sprites[player.current_sprite], this.x, this.y);
     },
     drawShot: function() {
@@ -183,6 +184,27 @@ $(function() {
         for (var i = 2; i < 8; i++) { this.matrix[13][i] = 1; }
         for (var i = 3; i < 8; i++) { this.matrix[14][i] = 1; }
         for (var i = 4; i < 8; i++) { this.matrix[15][i] = 1; }
+      },
+      checkCollision: function() {
+        var p = player;
+        for (var y = 0, y_len = this.matrix.length; y < y_len; y++) {
+          for (var x = 0, x_len = this.matrix[y].length; x < x_len; x++) {
+            if (this.matrix[y][x]) {
+              var b_x = this.x + x * this.box_size,
+                  b_y = this.y + y * this.box_size;
+              if (p.x + p.width > b_x && p.x < b_x + this.box_size) {
+                if (b_y <= p.y && b_y + this.box_size > p.y) {
+                  p.x = b_x - p.width;
+                  p.y = b_y + this.box_size;
+                }
+                if (b_y < p.y + p.height && b_y + this.box_size >= p.y + p.height) {
+                  p.x = b_x - p.width;
+                  p.y = b_y - p.height;
+                }
+              }
+            }
+          }
+        }
       }
     },
     shot: {
@@ -205,7 +227,7 @@ $(function() {
           if (this.x < player.x + player.width &&
             this.x + this.width > player.x && this.y < player.y + player.height &&
             this.y + this.height > player.y) {
-            player.kill();
+              player.kill();
           }
         }
       }
@@ -286,14 +308,13 @@ $(function() {
   titleScreen();
   $(document).bind("keydown keyup", function(e) {
     key[e.which] = (e.type == "keydown");
-    if (e.type === "keydown" && e.keyCode === 32 && !player.shot.fired && game != null && !player.dead) {
+    if (e.type === "keydown" && e.keyCode === 32 && !player.shot.fired && ! this.game_paused && this.game_started && !player.dead) {
       player.drawShot();
     }
-    if (e.type === "keydown" && e.keyCode === 80) {
+    if (e.type === "keydown" && e.keyCode === 80 && this.game_started) {
       if (!this.game_paused) {
         this.game_paused = true;
         clearInterval(game);
-        game = null;
         ctx.fillStyle = "#0066cc";
         ctx.globalAlpha = .7;
         ctx.fillRect(canvas.width / 2 - 80, canvas.height / 2 - 27, 160, 40);
@@ -326,7 +347,7 @@ $(function() {
 
   function score() {
     clearInterval(game);
-    game = null;
+    document.game_started = false;
     var score = "" + tally.score,
         lives = "" + tally.lives,
         y = 96,
@@ -350,6 +371,7 @@ $(function() {
       if (tally.lives === 0) {
         resetGame();
       }
+      this.game_started = true;
       $(this).unbind("keypress.next_round");
       game = setInterval(function() { run(); }, 34);
     });
@@ -375,8 +397,10 @@ $(function() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(this, canvas.width / 2 - 80, 92);
     };
+    document.game_started = false;
     $(document).bind("keypress.start_game", function(e) {
       if (e.keyCode === 32) {
+        this.game_started = true;
         $(this).unbind("keypress.start_game");
         game = setInterval(function() { run(); }, 34);
       }
