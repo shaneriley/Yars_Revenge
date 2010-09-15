@@ -108,7 +108,7 @@ $(function() {
       this.dead = true;
       tally.lives--;
       this.shot.fired = false;
-      if (this.lives === 0) { gameOver(); }
+      //if (tally.lives === 0) { gameOver(); }
       var i = 8;
       var flash = function() {
         this.current_sprite >= 6 ? this.current_sprite -= 6 : this.current_sprite += 2;
@@ -326,25 +326,32 @@ $(function() {
 
   function score() {
     clearInterval(game);
+    game = null;
     var score = "" + tally.score,
         lives = "" + tally.lives,
-        x = 380,
         y = 96,
-        ch = "",
+        ch,
         w = tally.numbers.width,
         h = tally.numbers.height;
+    var drawNumbers = function(str) {
+      var ch, x = 380;
+      for (var i = str.length - 1; i >= 0; i--) {
+        ch = parseInt(str.charAt(i), 10);
+        ctx.drawImage(tally.numbers.sprite, 0, h * ch, w, h, x, y, w, h);
+        x -= w + 4;
+      }
+    };
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    console.log(score);
-    for (var i = score.length - 1; i >= 0; i--) {
-      ch = parseInt(score.charAt(i), 10);
-      ctx.drawImage(tally.numbers.sprite, 0, h * ch, w, h, x, y, w, h);
-      x -= w + 4;
+    drawNumbers(score);
+    y += 52;
+    drawNumbers(lives);
+    if (tally.lives > 0) {
+      $(document).bind("keypress.next_round", function(e) {
+        $(this).unbind("keypress.next_round");
+        game = setInterval(function() { run(); }, 34);
+      });
     }
-    $(document).bind("keypress.next_round", function(e) {
-      $(this).unbind("keypress.next_round");
-      game = setInterval(function() { run(); }, 34);
-    });
   }
 
   function titleScreen() {
