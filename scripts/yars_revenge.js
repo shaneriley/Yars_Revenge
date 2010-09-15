@@ -14,12 +14,10 @@ $(function() {
     ],
     width: 32,
     height: 32,
-    lives: 3,
     speed: 12,
     x: 40,
     y: (canvas.height - 32) / 2,
     current_sprite: 6,
-    score: 0,
     shot: {
       width: 4,
       height: 4,
@@ -83,23 +81,23 @@ $(function() {
             if (e.matrix[y][x - 1]) { x--; }
             if (e.matrix[y][x]) {
               e.matrix[y][x] = 0;
-              this.score += e.points;
+              tally.score += e.points;
               this.shot.fired = false;
               if (x < e.matrix[y].length - 1 && y < e.matrix.length - 1) {
                 e.matrix[y + 1][x + 1] = 0;
-                this.score += e.points;
+                tally.score += e.points;
               }
               if (y - 1 >= 0 && x < e.matrix[y - 1].length - 1) {
                 e.matrix[y - 1][x + 1] = 0;
-                this.score += e.points;
+                tally.score += e.points;
               }
               if (x < e.matrix[y].length - 1) {
                 e.matrix[y][x + 1] = 0;
-                this.score += e.points;
+                tally.score += e.points;
               }
               if (x < e.matrix[y].length - 2) {
                 e.matrix[y][x + 2] = 0;
-                this.score += e.points;
+                tally.score += e.points;
               }
             }
           }
@@ -108,26 +106,35 @@ $(function() {
     },
     kill: function() {
       this.dead = true;
-      this.lives--;
+      tally.lives--;
       this.shot.fired = false;
-      if (this.lives === 0) {
-        gameOver();
-      }
+      if (this.lives === 0) { gameOver(); }
       var i = 8;
       var flash = function() {
         this.current_sprite >= 6 ? this.current_sprite -= 6 : this.current_sprite += 2;
         if (i > 0) {
           i--;
-          var q = setTimeout(function() { flash.apply(player); }, 34);
+          var q = setTimeout(function() { flash.apply(player); }, 68);
         }
         else {
           this.dead = false;
           this.current_sprite = 6;
           this.x = 40;
           this.y = (canvas.height - 32) / 2;
+          score();
         }
       };
       flash.apply(this);
+    }
+  };
+
+  var tally = {
+    lives: 3,
+    score: 0,
+    numbers: {
+      width: 28,
+      height: 14,
+      sprite: newImage("numbers.gif")
     }
   };
 
@@ -313,8 +320,31 @@ $(function() {
       ctx.fillStyle = "white";
       ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 25);
       ctx.font = "bold 18px monospace";
-      ctx.fillText("Score: " + player.score, canvas.width / 2, canvas.height / 2 + 10);
+      ctx.fillText("Score: " + tally.score, canvas.width / 2, canvas.height / 2 + 10);
     }, 40);
+  }
+
+  function score() {
+    clearInterval(game);
+    var score = "" + tally.score,
+        lives = "" + tally.lives,
+        x = 380,
+        y = 96,
+        ch = "",
+        w = tally.numbers.width,
+        h = tally.numbers.height;
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    console.log(score);
+    for (var i = score.length - 1; i >= 0; i--) {
+      ch = parseInt(score.charAt(i), 10);
+      ctx.drawImage(tally.numbers.sprite, 0, h * ch, w, h, x, y, w, h);
+      x -= w + 4;
+    }
+    $(document).bind("keypress.next_round", function(e) {
+      $(this).unbind("keypress.next_round");
+      game = setInterval(function() { run(); }, 34);
+    });
   }
 
   function titleScreen() {
