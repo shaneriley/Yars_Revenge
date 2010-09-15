@@ -147,8 +147,39 @@ $(function() {
       frequency: .1,
       len: 0,
       points: 1000,
-      swirl_points: 2000,
-      swirl_airborne_points: 6000,
+      swirl: {
+        sprite: newImage("swirl.gif"),
+        points: 2000,
+        airborne_points: 6000,
+        width: 32,
+        height: 32,
+        swirling: false,
+        attacking: false,
+        next_attack: 10,//100 + Math.floor(Math.random() * 200),
+        draw: function() {
+          ctx.drawImage(this.sprite, 0, (enemy.qotile.countdown % 4 > 1 ? 0 : 32), 32, 32, enemy.qotile.x, enemy.qotile.y + 2, 32, 32);
+          if (!this.attacking) {
+            enemy.qotile.countdown--;
+          }
+          else if (enemy.qotile.x > 0) {
+            enemy.qotile.x -= 16;
+            enemy.qotile.y -= this.y_change;
+          }
+          else {
+            this.attacking = false;
+            this.swirling = false;
+            this.next_attack = 100 + Math.floor(Math.random() * 200);
+            enemy.qotile.countdown = this.next_attack;
+            enemy.qotile.x = canvas.width - enemy.qotile.width - 5;
+            enemy.qotile.y = enemy.barrier.y + (enemy.barrier.height / 2 - enemy.qotile.height / 2);
+          }
+          if (enemy.qotile.countdown === 0 && !this.attacking) {
+            this.attacking = true;
+            this.y_change = Math.sqrt(Math.pow(+(enemy.qotile.y - player.y), 2) + Math.pow(enemy.qotile.x - player.x, 2)) / enemy.qotile.x;
+            if (enemy.qotile.y - player.y < 0) { this.y_change = -this.y_change; }
+          }
+        }
+      },
       draw: function() {
         var q = this,
             r = function(x, y, w, h) { ctx.fillRect(x, y, w, h); };
@@ -164,7 +195,13 @@ $(function() {
         r(q.x + 24, q.y, 8, 36);
         q.color = generateColor(q.frequency, q.len);
         (q.len > 49) ? q.len = 0 : q.len++;
-      }
+        q.countdown--;
+        if (q.countdown === 0) {
+          q.swirl.swirling = true;
+          q.swirl.next_attack = 10 + Math.floor(Math.random() * 80);
+          q.countdown = q.swirl.next_attack;
+        }
+      },
     },
     barrier: {
       x: canvas.width - 128,
@@ -215,7 +252,8 @@ $(function() {
           for (var x = 0, x_len = this.matrix[y].length; x < x_len; x++) {
             if (this.matrix[y][x]) {
               var b_x = this.x + x * this.box_size,
-                  b_y = this.y + y * this.box_size;
+                  b_y = this.y + y * this.box_size,
+                  dir = p.current_sprite;
               if (p.x + p.width > b_x && p.x < b_x + this.box_size) {
                 if (b_y <= p.y && b_y + this.box_size > p.y) {
                   p.x = b_x - p.width;
@@ -275,28 +313,28 @@ $(function() {
       if (this.barrier.dir === "d") {
         if (this.barrier.y < canvas.height / 2 - 64) {
           this.barrier.y += 2;
-          this.qotile.y += 2;
+          if (!this.qotile.swirl.attacking) { this.qotile.y += 2; }
         }
         else {
           this.barrier.y -= 2;
-          this.qotile.y -= 2;
+          if (!this.qotile.swirl.attacking) { this.qotile.y -= 2; }
           this.barrier.dir = "u";
         }
       }
       else {
         if (this.barrier.y > canvas.height / 2 - 192) {
           this.barrier.y -= 2;
-          this.qotile.y -= 2;
+          if (!this.qotile.swirl.attacking) { this.qotile.y -= 2; }
         }
         else {
           this.barrier.y += 2;
-          this.qotile.y += 2;
+          if (!this.qotile.swirl.attacking) { this.qotile.y += 2; }
           this.barrier.dir = "d";
         }
       }
     },
     draw: function() {
-      this.qotile.draw();
+      (this.qotile.swirl.swirling) ? this.qotile.swirl.draw() : this.qotile.draw();
       this.barrier.draw();
       this.moveBase();
       this.shot.draw();
@@ -305,6 +343,7 @@ $(function() {
   enemy.qotile.x = canvas.width - enemy.qotile.width - 5;
   enemy.qotile.y = (canvas.height - enemy.qotile.height) / 2;
   enemy.barrier.initMatrix();
+  enemy.qotile.countdown = enemy.qotile.swirl.next_attack;
 
   var forcefield = {
     sprite: newImage("safe_field.png"),
