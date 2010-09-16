@@ -30,73 +30,132 @@ $(function() {
             p = player,
             s = this;
             dir = player.current_sprite;
-        ctx.fillStyle = s.color;
-        if (!s.fired) {
-          s.fired = true;
-          if (dir < 2) {
-            s.x = p.x - s.width;
-            s.y = p.y + p.height / 2 - 2;
-            s.dir = "l";
+        if (p.cannon.armed && !p.cannon.fired) {
+          p.cannon.fired = true;
+        }
+        else {
+          ctx.fillStyle = s.color;
+          if (!s.fired) {
+            s.fired = true;
+            if (dir < 2) {
+              s.x = p.x - s.width;
+              s.y = p.y + p.height / 2 - 2;
+              s.dir = "l";
+            }
+            else if (dir === 2 || dir === 3) {
+              s.x = p.x + (p.width - s.width) / 2;
+              s.y = p.y - s.height;
+              s.dir = "u";
+            }
+            else if (dir === 4 || dir === 5) {
+              s.x = p.x + p.width;
+              s.y = p.y + p.height / 2 - 2;
+              s.dir = "r";
+            }
+            else {
+              s.x = p.x + (p.width - s.width) / 2;
+              s.y = p.y + p.height;
+              s.dir = "d";
+            }
           }
-          else if (dir === 2 || dir === 3) {
-            s.x = p.x + (p.width - s.width) / 2;
-            s.y = p.y - s.height;
-            s.dir = "u";
+          if (s.fired) {
+            if (s.dir === "l") {
+              (s.x >= s.width) ? s.x -= s.speed : s.fired = false;
+            }
+            else if (s.dir === "u") {
+              (s.y >= s.height) ? s.y -= s.speed : s.fired = false;
+            }
+            else if (s.dir === "r") {
+              (s.x <= canvas.width - s.width) ? s.x += s.speed : s.fired = false;
+            }
+            else {
+              (s.y <= canvas.height - s.height) ? s.y += s.speed : s.fired = false;
+            }
+            if (s.fired) { ctx.fillRect(s.x, s.y, s.width, s.height); }
           }
-          else if (dir === 4 || dir === 5) {
-            s.x = p.x + p.width;
-            s.y = p.y + p.height / 2 - 2;
-            s.dir = "r";
-          }
-          else {
-            s.x = p.x + (p.width - s.width) / 2;
-            s.y = p.y + p.height;
-            s.dir = "d";
+          if (s.y >= e.y && s.y + s.height <= e.y + e.height) {
+            if (s.x + s.width >= e.x) {
+              var x = s.x + s.width - e.x,
+                  y = s.y - e.y;
+              x = (x * 2 - 1 < e.box_size * 2) ? 0 : Math.floor((x + (x % e.box_size) + 1) / e.box_size);
+              y = Math.floor((y + (y % e.box_size)) / e.box_size);
+              if (y < e.matrix.length && x < e.matrix[y].length) {
+                if (e.matrix[y][x - 1]) { x--; }
+                if (e.matrix[y][x]) {
+                  e.matrix[y][x] = 0;
+                  tally.score += e.points;
+                  s.fired = false;
+                  if (x < e.matrix[y].length - 1 && y < e.matrix.length - 1) {
+                    e.matrix[y + 1][x + 1] = 0;
+                    tally.score += e.points;
+                  }
+                  if (y - 1 >= 0 && x < e.matrix[y - 1].length - 1) {
+                    e.matrix[y - 1][x + 1] = 0;
+                    tally.score += e.points;
+                  }
+                  if (x < e.matrix[y].length - 1) {
+                    e.matrix[y][x + 1] = 0;
+                    tally.score += e.points;
+                  }
+                  if (x < e.matrix[y].length - 2) {
+                    e.matrix[y][x + 2] = 0;
+                    tally.score += e.points;
+                  }
+                }
+              }
+            }
           }
         }
-        if (s.fired) {
-          if (s.dir === "l") {
-            (s.x >= s.width) ? s.x -= s.speed : s.fired = false;
-          }
-          else if (s.dir === "u") {
-            (s.y >= s.height) ? s.y -= s.speed : s.fired = false;
-          }
-          else if (s.dir === "r") {
-            (s.x <= canvas.width - s.width) ? s.x += s.speed : s.fired = false;
-          }
-          else {
-            (s.y <= canvas.height - s.height) ? s.y += s.speed : s.fired = false;
-          }
-          if (s.fired) { ctx.fillRect(s.x, s.y, s.width, s.height); }
+      }
+    },
+    cannon: {
+      width: 32,
+      height: 16,
+      cycle: 4,
+      speed: 16,
+      colors: ["#52319c", "#31319c", "#8c5a21", "#390063"],
+      armed: false,
+      fired: false,
+      draw: function() {
+        var c = this,
+            r = function(x, y, w, h) { ctx.fillRect(x, y, w, h); };
+        if (c.fired) {
+          c.x += 16;
         }
-        if (s.y >= e.y && s.y + s.height <= e.y + e.height) {
-          if (s.x + s.width >= e.x) {
-            var x = s.x + s.width - e.x,
-                y = s.y - e.y;
-            x = (x * 2 - 1 < e.box_size * 2) ? 0 : Math.floor((x + (x % e.box_size) + 1) / e.box_size);
-            y = Math.floor((y + (y % e.box_size)) / e.box_size);
-            if (y < e.matrix.length && x < e.matrix[y].length) {
-              if (e.matrix[y][x - 1]) { x--; }
-              if (e.matrix[y][x]) {
-                e.matrix[y][x] = 0;
-                tally.score += e.points;
-                s.fired = false;
-                if (x < e.matrix[y].length - 1 && y < e.matrix.length - 1) {
-                  e.matrix[y + 1][x + 1] = 0;
-                  tally.score += e.points;
-                }
-                if (y - 1 >= 0 && x < e.matrix[y - 1].length - 1) {
-                  e.matrix[y - 1][x + 1] = 0;
-                  tally.score += e.points;
-                }
-                if (x < e.matrix[y].length - 1) {
-                  e.matrix[y][x + 1] = 0;
-                  tally.score += e.points;
-                }
-                if (x < e.matrix[y].length - 2) {
-                  e.matrix[y][x + 2] = 0;
-                  tally.score += e.points;
-                }
+        else {
+          c.x = 5;
+          c.y = (player.height - c.height) / 2 + player.y;
+        }
+        ctx.save();
+        for (var i in c.colors) {
+          ctx.fillStyle = c.colors[i];
+          r(c.x, c.y + i * 4, c.width, 4);
+          c.colors[i] = generateColor(.1, Math.floor(Math.random() * 60));
+        }
+        ctx.restore();
+        c.cycle--;
+        if (!c.cycle) {
+          c.cycle = 4;
+          c.width = (c.width === 32) ? 16 : 32;
+        }
+        if (c.fired) { c.checkCollision(); }
+      },
+      checkCollision: function() {
+        var c = this,
+            b = enemy.barrier;
+        if (c.y >= b.y && c.y + c.height <= b.y + b.height) {
+          if (c.x + c.width >= b.x) {
+            var x = c.x + c.width - b.x,
+                y = c.y - b.y;
+            x = (x * 2 - 1 < b.box_size * 2) ? 0 : Math.floor((x + (x % b.box_size) + 1) / b.box_size);
+            y = Math.floor((y + (y % b.box_size)) / b.box_size);
+            if (y < b.matrix.length && x < b.matrix[y].length) {
+              if (b.matrix[y][x - 1]) { x--; }
+              if (b.matrix[y][x]) {
+                b.matrix[y][x] = 0;
+                if (b.matrix.length >= y + 1) { b.matrix[y + 1][x] = 0; }
+                tally.score += b.points * 2;
+                c.fired = c.armed = false;
               }
             }
           }
@@ -134,7 +193,7 @@ $(function() {
     kill: function() {
       this.dead = true;
       tally.lives--;
-      this.shot.fired = false;
+      this.shot.fired = this.cannon.armed = this.cannon.fired = false;
       var i = 8;
       var flash = function() {
         this.current_sprite >= 6 ? this.current_sprite -= 6 : this.current_sprite += 2;
@@ -314,6 +373,7 @@ $(function() {
                   if (10 + Math.floor(Math.random() * 10) === 14) {
                     this.matrix[y][x] = 0;
                     tally.score += this.chomp_points;
+                    p.cannon.armed = true;
                   }
                 }
               }
@@ -523,6 +583,7 @@ $(function() {
     enemy.draw();
     forcefield.draw();
     if (player.shot.fired) { player.shot.draw(); }
+    if (player.cannon.armed) { player.cannon.draw(); }
   }
 
   function clearCanvas() {
