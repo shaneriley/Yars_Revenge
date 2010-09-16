@@ -311,10 +311,10 @@ $(function() {
                   else {
                     p.y = b_y - p.height;
                   }
-                  /*if (10 + Math.floor(Math.random() * 10) === 14) {
+                  if (10 + Math.floor(Math.random() * 10) === 14) {
                     this.matrix[y][x] = 0;
-                    p.score += this.chomp_points;
-                  }*/
+                    tally.score += this.chomp_points;
+                  }
                 }
               }
             }
