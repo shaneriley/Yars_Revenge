@@ -298,13 +298,23 @@ $(function() {
                   b_y = this.y + y * this.box_size,
                   dir = p.current_sprite;
               if (p.x + p.width > b_x && p.x < b_x + this.box_size) {
-                if (b_y <= p.y && b_y + this.box_size > p.y) {
-                  p.x = b_x - p.width;
-                  p.y = b_y + this.box_size;
-                }
-                if (b_y < p.y + p.height && b_y + this.box_size >= p.y + p.height) {
-                  p.x = b_x - p.width;
-                  p.y = b_y - p.height;
+                if ((b_y <= p.y && b_y + this.box_size > p.y) || (b_y < p.y + p.height && b_y + this.box_size >= p.y + p.height)) {
+                  if (dir === 4 || dir === 5) {
+                    p.x = b_x - p.width;
+                  }
+                  else if (dir < 2) {
+                    p.x = b_x + this.box_size;
+                  }
+                  else if (dir === 2 || dir === 3) {
+                    p.y = b_y + this.box_size;
+                  }
+                  else {
+                    p.y = b_y - p.height;
+                  }
+                  /*if (10 + Math.floor(Math.random() * 10) === 14) {
+                    this.matrix[y][x] = 0;
+                    p.score += this.chomp_points;
+                  }*/
                 }
               }
             }
@@ -354,7 +364,7 @@ $(function() {
     },
     moveBase: function() {
       if (this.barrier.dir === "d") {
-        if (this.barrier.y < canvas.height / 2 - 64) {
+        if (this.barrier.y < canvas.height / 2 - 92) {
           this.barrier.y += 2;
           if (!this.qotile.swirl.attacking) { this.qotile.y += 2; }
         }
@@ -365,7 +375,7 @@ $(function() {
         }
       }
       else {
-        if (this.barrier.y > canvas.height / 2 - 192) {
+        if (this.barrier.y > canvas.height / 2 - 164) {
           this.barrier.y -= 2;
           if (!this.qotile.swirl.attacking) { this.qotile.y -= 2; }
         }
