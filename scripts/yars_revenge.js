@@ -121,6 +121,9 @@ $(function() {
             r = function(x, y, w, h) { ctx.fillRect(x, y, w, h); };
         if (c.fired) {
           c.x += 16;
+          if (c.x >= canvas.width) {
+            c.fired = c.armed = false;
+          }
         }
         else {
           c.x = 5;
@@ -142,7 +145,27 @@ $(function() {
       },
       checkCollision: function() {
         var c = this,
-            b = enemy.barrier;
+            b = enemy.barrier,
+            q = enemy.qotile;
+        if (c.y >= q.y && c.y + c.height <= q.y + q.height) {
+          if (c.x + c.width >= q.x) {
+            if (!q.swirl.swirling) {
+              tally.score += q.points;
+            }
+            else {
+              tally.score += q.swirl.attacking ? q.swirl.airborne_points : q.swirl.points;
+            }
+            player.shot.fired = q.swirl.swirling = q.swirl.attacking = c.armed = c.fired = false;
+            player.x = 40;
+            player.y = (canvas.height - 32) / 2;
+            player.current_sprite = 6;
+            b.initMatrix();
+            enemy.shot.x = canvas.width - 90;
+            enemy.shot.y = canvas.height / 2;
+            q.swirl.next_attack = 80 + Math.floor(Math.random() * 150);
+            score();
+          }
+        }
         if (c.y >= b.y && c.y + c.height <= b.y + b.height) {
           if (c.x + c.width >= b.x) {
             var x = c.x + c.width - b.x,
