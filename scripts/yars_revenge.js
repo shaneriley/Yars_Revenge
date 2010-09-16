@@ -23,7 +23,85 @@ $(function() {
       height: 4,
       color: "#ffffff",
       speed: 16,
-      fired: false
+      fired: false,
+      draw: function() {
+        if (player.dead) { return; }
+        var e = enemy.barrier,
+            p = player,
+            s = this;
+            dir = player.current_sprite;
+        ctx.fillStyle = s.color;
+        if (!s.fired) {
+          s.fired = true;
+          if (dir < 2) {
+            s.x = p.x - s.width;
+            s.y = p.y + p.height / 2 - 2;
+            s.dir = "l";
+          }
+          else if (dir === 2 || dir === 3) {
+            s.x = p.x + (p.width - s.width) / 2;
+            s.y = p.y - s.height;
+            s.dir = "u";
+          }
+          else if (dir === 4 || dir === 5) {
+            s.x = p.x + p.width;
+            s.y = p.y + p.height / 2 - 2;
+            s.dir = "r";
+          }
+          else {
+            s.x = p.x + (p.width - s.width) / 2;
+            s.y = p.y + p.height;
+            s.dir = "d";
+          }
+        }
+        if (s.fired) {
+          if (s.dir === "l") {
+            (s.x >= s.width) ? s.x -= s.speed : s.fired = false;
+          }
+          else if (s.dir === "u") {
+            (s.y >= s.height) ? s.y -= s.speed : s.fired = false;
+          }
+          else if (s.dir === "r") {
+            (s.x <= canvas.width - s.width) ? s.x += s.speed : s.fired = false;
+          }
+          else {
+            (s.y <= canvas.height - s.height) ? s.y += s.speed : s.fired = false;
+          }
+          if (s.fired) { ctx.fillRect(s.x, s.y, s.width, s.height); }
+        }
+        if (s.y >= e.y && s.y + s.height <= e.y + e.height) {
+          if (s.x + s.width >= e.x) {
+            var x = s.x + s.width - e.x,
+                y = s.y - e.y;
+            x = (x * 2 - 1 < e.box_size * 2) ? 0 : Math.floor((x + (x % e.box_size) + 1) / e.box_size);
+            y = Math.floor((y + (y % e.box_size)) / e.box_size);
+            if (y < e.matrix.length && x < e.matrix[y].length) {
+              if (e.matrix[y][x - 1]) { x--; }
+              if (e.matrix[y][x]) {
+                e.matrix[y][x] = 0;
+                tally.score += e.points;
+                s.fired = false;
+                if (x < e.matrix[y].length - 1 && y < e.matrix.length - 1) {
+                  e.matrix[y + 1][x + 1] = 0;
+                  tally.score += e.points;
+                }
+                if (y - 1 >= 0 && x < e.matrix[y - 1].length - 1) {
+                  e.matrix[y - 1][x + 1] = 0;
+                  tally.score += e.points;
+                }
+                if (x < e.matrix[y].length - 1) {
+                  e.matrix[y][x + 1] = 0;
+                  tally.score += e.points;
+                }
+                if (x < e.matrix[y].length - 2) {
+                  e.matrix[y][x + 2] = 0;
+                  tally.score += e.points;
+                }
+              }
+            }
+          }
+        }
+      }
     },
     draw: function() {
       var max_x = canvas.width - this.width,
@@ -52,83 +130,6 @@ $(function() {
       }
       enemy.barrier.checkCollision();
       drawImage(this.sprites[player.current_sprite], this.x, this.y);
-    },
-    drawShot: function() {
-      if (this.dead) { return; }
-      var e = enemy.barrier,
-          p = this,
-          dir = p.current_sprite;
-      ctx.fillStyle = p.shot.color;
-      if (!p.shot.fired) {
-        p.shot.fired = true;
-        if (dir < 2) {
-          p.shot.x = p.x - p.shot.width;
-          p.shot.y = p.y + p.height / 2 - 2;
-          p.shot.dir = "l";
-        }
-        else if (dir === 2 || dir === 3) {
-          p.shot.x = p.x + (p.width - p.shot.width) / 2;
-          p.shot.y = p.y - p.shot.height;
-          p.shot.dir = "u";
-        }
-        else if (dir === 4 || dir === 5) {
-          p.shot.x = p.x + p.width;
-          p.shot.y = p.y + p.height / 2 - 2;
-          p.shot.dir = "r";
-        }
-        else {
-          p.shot.x = p.x + (p.width - p.shot.width) / 2;
-          p.shot.y = p.y + p.height;
-          p.shot.dir = "d";
-        }
-      }
-      if (p.shot.fired) {
-        if (p.shot.dir === "l") {
-          (p.shot.x >= p.shot.width) ? p.shot.x -= p.shot.speed : p.shot.fired = false;
-        }
-        else if (p.shot.dir === "u") {
-          (p.shot.y >= p.shot.height) ? p.shot.y -= p.shot.speed : p.shot.fired = false;
-        }
-        else if (p.shot.dir === "r") {
-          (p.shot.x <= canvas.width - p.shot.width) ? p.shot.x += p.shot.speed : p.shot.fired = false;
-        }
-        else {
-          (p.shot.y <= canvas.height - p.shot.height) ? p.shot.y += p.shot.speed : p.shot.fired = false;
-        }
-        if (p.shot.fired) { ctx.fillRect(p.shot.x, p.shot.y, p.shot.width, p.shot.height); }
-      }
-      if (p.shot.y >= e.y && p.shot.y + p.shot.height <= e.y + e.height) {
-        if (p.shot.x + p.shot.width >= e.x) {
-          var x = p.shot.x + p.shot.width - e.x,
-              y = p.shot.y - e.y;
-          x = (x * 2 - 1 < e.box_size * 2) ? 0 : Math.floor((x + (x % e.box_size) + 1) / e.box_size);
-          y = Math.floor((y + (y % e.box_size)) / e.box_size);
-          if (y < e.matrix.length && x < e.matrix[y].length) {
-            if (e.matrix[y][x - 1]) { x--; }
-            if (e.matrix[y][x]) {
-              e.matrix[y][x] = 0;
-              tally.score += e.points;
-              p.shot.fired = false;
-              if (x < e.matrix[y].length - 1 && y < e.matrix.length - 1) {
-                e.matrix[y + 1][x + 1] = 0;
-                tally.score += e.points;
-              }
-              if (y - 1 >= 0 && x < e.matrix[y - 1].length - 1) {
-                e.matrix[y - 1][x + 1] = 0;
-                tally.score += e.points;
-              }
-              if (x < e.matrix[y].length - 1) {
-                e.matrix[y][x + 1] = 0;
-                tally.score += e.points;
-              }
-              if (x < e.matrix[y].length - 2) {
-                e.matrix[y][x + 2] = 0;
-                tally.score += e.points;
-              }
-            }
-          }
-        }
-      }
     },
     kill: function() {
       this.dead = true;
@@ -407,7 +408,7 @@ $(function() {
     key[e.which] = (e.type == "keydown");
     if (e.type === "keydown" && e.keyCode === 32 && !player.shot.fired && ! this.game_paused && this.game_started && !player.dead) {
       if (!((player.x > forcefield.x && player.x < forcefield.x + forcefield.width) || (player.x + player.width > forcefield.x && player.x + player.width < forcefield.x + forcefield.width))) {
-        player.drawShot();
+        player.shot.draw();
       }
     }
     if (e.type === "keydown" && e.keyCode === 80 && this.game_started) {
@@ -511,7 +512,7 @@ $(function() {
     player.draw();
     enemy.draw();
     forcefield.draw();
-    if (player.shot.fired) { player.drawShot(); }
+    if (player.shot.fired) { player.shot.draw(); }
   }
 
   function clearCanvas() {
