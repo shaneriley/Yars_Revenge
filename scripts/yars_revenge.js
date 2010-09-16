@@ -55,27 +55,28 @@ $(function() {
     },
     drawShot: function() {
       if (this.dead) { return; }
-      var e = enemy.barrier;
-      ctx.fillStyle = this.shot.color;
-      if (!this.shot.fired) {
-        this.shot.fired = true;
-        this.shot.x = this.x + this.width;
-        this.shot.y = this.y + this.height / 2 - 2;
+      var e = enemy.barrier,
+          p = this;
+      ctx.fillStyle = p.shot.color;
+      if (!p.shot.fired) {
+        p.shot.fired = true;
+        p.shot.x = p.x + p.width;
+        p.shot.y = p.y + p.height / 2 - 2;
       }
-      else if (this.shot.x <= canvas.width - 4) {
-        this.shot.fired = true;
-        this.shot.x += this.shot.speed;
+      else if (p.shot.x <= canvas.width - 4) {
+        p.shot.fired = true;
+        p.shot.x += p.shot.speed;
       }
       else {
-        this.shot.fired = false;
+        p.shot.fired = false;
       }
-      if (this.shot.fired) {
-        ctx.fillRect(this.shot.x, this.shot.y, this.shot.width, this.shot.height);
+      if (p.shot.fired) {
+        ctx.fillRect(p.shot.x, p.shot.y, p.shot.width, p.shot.height);
       }
-      if (this.shot.y >= e.y && this.shot.y + this.shot.height <= e.y + e.height) {
-        if (this.shot.x + this.shot.width >= e.x) {
-          var x = this.shot.x + this.shot.width - e.x,
-              y = this.shot.y - e.y;
+      if (p.shot.y >= e.y && p.shot.y + p.shot.height <= e.y + e.height) {
+        if (p.shot.x + p.shot.width >= e.x) {
+          var x = p.shot.x + p.shot.width - e.x,
+              y = p.shot.y - e.y;
           x = (x * 2 - 1 < e.box_size * 2) ? 0 : Math.floor((x + (x % e.box_size) + 1) / e.box_size);
           y = Math.floor((y + (y % e.box_size)) / e.box_size);
           if (y < e.matrix.length && x < e.matrix[y].length) {
@@ -83,7 +84,7 @@ $(function() {
             if (e.matrix[y][x]) {
               e.matrix[y][x] = 0;
               tally.score += e.points;
-              this.shot.fired = false;
+              p.shot.fired = false;
               if (x < e.matrix[y].length - 1 && y < e.matrix.length - 1) {
                 e.matrix[y + 1][x + 1] = 0;
                 tally.score += e.points;
@@ -109,7 +110,6 @@ $(function() {
       this.dead = true;
       tally.lives--;
       this.shot.fired = false;
-      //if (tally.lives === 0) { gameOver(); }
       var i = 8;
       var flash = function() {
         this.current_sprite >= 6 ? this.current_sprite -= 6 : this.current_sprite += 2;
@@ -259,9 +259,11 @@ $(function() {
         var adjustX = function() {
           if (p.current_sprite < 2) {
             p.x = b_x + this.box_size;
+            p.y += this.dir === "d" ? 2 : -2;
           }
           else if (p.current_sprite > 3 && p.current_sprite < 6) {
             p.x = b_x - p.width;
+            p.y += this.dir === "d" ? 2 : -2;
           }
         };
         for (var y = 0, y_len = this.matrix.length; y < y_len; y++) {
@@ -380,7 +382,9 @@ $(function() {
   $(document).bind("keydown keyup", function(e) {
     key[e.which] = (e.type == "keydown");
     if (e.type === "keydown" && e.keyCode === 32 && !player.shot.fired && ! this.game_paused && this.game_started && !player.dead) {
-      player.drawShot();
+      if (!((player.x > forcefield.x && player.x < forcefield.x + forcefield.width) || (player.x + player.width > forcefield.x && player.x + player.width < forcefield.x + forcefield.width))) {
+        player.drawShot();
+      }
     }
     if (e.type === "keydown" && e.keyCode === 80 && this.game_started) {
       if (!this.game_paused) {
