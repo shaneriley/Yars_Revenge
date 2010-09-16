@@ -56,22 +56,46 @@ $(function() {
     drawShot: function() {
       if (this.dead) { return; }
       var e = enemy.barrier,
-          p = this;
+          p = this,
+          dir = p.current_sprite;
       ctx.fillStyle = p.shot.color;
       if (!p.shot.fired) {
         p.shot.fired = true;
-        p.shot.x = p.x + p.width;
-        p.shot.y = p.y + p.height / 2 - 2;
-      }
-      else if (p.shot.x <= canvas.width - 4) {
-        p.shot.fired = true;
-        p.shot.x += p.shot.speed;
-      }
-      else {
-        p.shot.fired = false;
+        if (dir < 2) {
+          p.shot.x = p.x - p.shot.width;
+          p.shot.y = p.y + p.height / 2 - 2;
+          p.shot.dir = "l";
+        }
+        else if (dir === 2 || dir === 3) {
+          p.shot.x = p.x + (p.width - p.shot.width) / 2;
+          p.shot.y = p.y - p.shot.height;
+          p.shot.dir = "u";
+        }
+        else if (dir === 4 || dir === 5) {
+          p.shot.x = p.x + p.width;
+          p.shot.y = p.y + p.height / 2 - 2;
+          p.shot.dir = "r";
+        }
+        else {
+          p.shot.x = p.x + (p.width - p.shot.width) / 2;
+          p.shot.y = p.y + p.height;
+          p.shot.dir = "d";
+        }
       }
       if (p.shot.fired) {
-        ctx.fillRect(p.shot.x, p.shot.y, p.shot.width, p.shot.height);
+        if (p.shot.dir === "l") {
+          (p.shot.x >= p.shot.width) ? p.shot.x -= p.shot.speed : p.shot.fired = false;
+        }
+        else if (p.shot.dir === "u") {
+          (p.shot.y >= p.shot.height) ? p.shot.y -= p.shot.speed : p.shot.fired = false;
+        }
+        else if (p.shot.dir === "r") {
+          (p.shot.x <= canvas.width - p.shot.width) ? p.shot.x += p.shot.speed : p.shot.fired = false;
+        }
+        else {
+          (p.shot.y <= canvas.height - p.shot.height) ? p.shot.y += p.shot.speed : p.shot.fired = false;
+        }
+        if (p.shot.fired) { ctx.fillRect(p.shot.x, p.shot.y, p.shot.width, p.shot.height); }
       }
       if (p.shot.y >= e.y && p.shot.y + p.shot.height <= e.y + e.height) {
         if (p.shot.x + p.shot.width >= e.x) {
