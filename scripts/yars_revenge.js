@@ -122,6 +122,12 @@ $(function() {
           this.current_sprite = 6;
           this.x = 40;
           this.y = (canvas.height - 32) / 2;
+          enemy.shot.x = canvas.width - 90;
+          enemy.shot.y = canvas.height / 2;
+          enemy.qotile.x = canvas.width - enemy.qotile.width - 5;
+          enemy.qotile.y = enemy.barrier.y + (enemy.barrier.height / 2 - enemy.qotile.height / 2);
+          enemy.qotile.swirl.swirling = enemy.qotile.swirl.attacking = false;
+          enemy.qotile.swirl.next_attack = enemy.qotile.countdown = 100 + Math.floor(Math.random() * 200);
           score();
         }
       };
@@ -177,6 +183,16 @@ $(function() {
             this.attacking = true;
             this.y_change = Math.sqrt(Math.pow(+(enemy.qotile.y - player.y), 2) + Math.pow(enemy.qotile.x - player.x, 2)) / enemy.qotile.x;
             if (enemy.qotile.y - player.y < 0) { this.y_change = -this.y_change; }
+          }
+        },
+        checkCollision: function() {
+          var p = player,
+              q = enemy.qotile;
+          if (p.dead) { return; }
+          if (q.x < p.x + p.width &&
+            q.x + q.width > p.x && q.y < p.y + p.height &&
+            q.y + q.height > p.y) {
+              p.kill();
           }
         }
       },
@@ -334,7 +350,11 @@ $(function() {
       }
     },
     draw: function() {
-      (this.qotile.swirl.swirling) ? this.qotile.swirl.draw() : this.qotile.draw();
+      if (this.qotile.swirl.swirling) {
+        this.qotile.swirl.draw();
+        this.qotile.swirl.checkCollision();
+      }
+      else { this.qotile.draw(); }
       this.barrier.draw();
       this.moveBase();
       this.shot.draw();
