@@ -532,14 +532,16 @@ $(function() {
       drawImage(this.sprite, this.x, -Math.round(Math.random() * (this.height - canvas.height) / 2));
     }
   };
-  var key = [],
-      game;
+  var key = [], game;
   titleScreen();
   $(document).bind("keydown keyup", function(e) {
-    key[e.which] = (e.type == "keydown");
-    if (e.type === "keydown" && e.keyCode === 32 && !player.shot.fired && ! this.game_paused && this.game_started && !player.dead) {
-      if (!((player.x > forcefield.x && player.x < forcefield.x + forcefield.width) || (player.x + player.width > forcefield.x && player.x + player.width < forcefield.x + forcefield.width))) {
-        player.shot.draw();
+    var cancel_default = (e.keyCode === 32 || (e.keyCode > 36 && e.keyCode < 41)),
+        p = player,
+        f = forcefield;
+    key[e.which] = e.type === "keydown";
+    if (e.type === "keydown" && e.keyCode === 32 && !p.shot.fired && !this.game_paused && this.game_started && !p.dead) {
+      if (!((p.x > f.x && p.x < f.x + f.width) || (p.x + p.width > f.x && p.x + p.width < f.x + f.width))) {
+        p.shot.draw();
       }
     }
     if (e.type === "keydown" && e.keyCode === 80 && this.game_started) {
@@ -560,6 +562,7 @@ $(function() {
         game = setInterval(function() { run(); }, 34);
       }
     }
+    if (cancel_default) { e.preventDefault(); }
   });
 
   function gameOver() {
@@ -629,10 +632,10 @@ $(function() {
       ctx.drawImage(this, canvas.width / 2 - 80, 92);
     };
     document.game_started = false;
-    $(document).bind("keypress.start_game", function(e) {
+    $(document).bind("keydown.start_game", function(e) {
       if (e.keyCode === 32) {
         this.game_started = true;
-        $(this).unbind("keypress.start_game");
+        $(this).unbind("keydown.start_game");
         game = setInterval(function() { run(); }, 34);
       }
     });
