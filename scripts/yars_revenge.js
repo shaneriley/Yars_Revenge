@@ -210,32 +210,34 @@ $(function() {
       }
     },
     draw: function() {
-      var max_x = canvas.width - this.width,
-          max_y = canvas.height - this.height;
-      if (!this.dead) {
+      var p = this,
+          max_x = canvas.width - p.width,
+          max_y = canvas.height - p.height;
+      if (!p.dead) {
         if (key[37]) {
-          this.current_sprite = this.current_sprite % 2 ? 0 : 1;
+          p.current_sprite = p.current_sprite % 2 ? 0 : 1;
         }
         if (key[38]) {
-          this.current_sprite = this.current_sprite % 2 ? 2 : 3;
+          p.current_sprite = p.current_sprite % 2 ? 2 : 3;
         }
         if (key[39]) {
-          this.current_sprite = this.current_sprite % 2 ? 4 : 5;
+          p.current_sprite = p.current_sprite % 2 ? 4 : 5;
         }
         if (key[40]) {
-          this.current_sprite = this.current_sprite % 2 ? 6 : 7;
+          p.current_sprite = p.current_sprite % 2 ? 6 : 7;
         }
-        this.x -= key[37] && this.x > 0 ? this.speed : 0;
-        this.x += key[39] && this.x < max_x ? this.speed : 0;
-        this.y -= key[38] && this.y >= 0 ? this.speed : 0;
-        this.y += key[40] && this.y <= max_y ? this.speed : 0;
-        this.x > max_x ? this.x = max_x : 1;
-        this.x < 0 ? this.x = 0 : 1;
-        this.y > max_y ? this.y = 0 : 1;
-        this.y < 0 ? this.y = max_y : 1;
+        p.x -= key[37] && p.x > 0 ? p.speed : 0;
+        p.x += key[39] && p.x < max_x ? p.speed : 0;
+        p.y -= key[38] && p.y >= 0 ? p.speed : 0;
+        p.y += key[40] && p.y <= max_y ? p.speed : 0;
+        p.x > max_x ? p.x = max_x : 1;
+        p.x < 0 ? p.x = 0 : 1;
+        p.y > max_y ? p.y = 0 : 1;
+        p.y < 0 ? p.y = max_y : 1;
       }
+      p.checkCollision();
       enemy.barrier.checkCollision();
-      drawImage(this.sprites[player.current_sprite], this.x, this.y);
+      drawImage(p.sprites[player.current_sprite], p.x, p.y);
     },
     kill: function() {
       this.dead = true;
@@ -263,6 +265,17 @@ $(function() {
         }
       };
       flash.apply(this);
+    },
+    checkCollision: function() {
+      var p = this,
+          q = enemy.qotile;
+      if (!q.swirl.swirling && !p.cannon.armed) {
+        if ((p.x >= q.x && p.x < q.x + q.width) || (p.x + p.width >= q.x && p.x + p.width < q.x + q.width)) {
+          if ((p.y >= q.y && p.y < q.y + q.height) || (p.y + p.height >= q.y && p.y + p.height < q.y + q.height)) {
+            p.cannon.armed = true;
+          }
+        }
+      }
     }
   };
 
