@@ -240,21 +240,22 @@ $(function() {
       drawImage(p.sprites[player.current_sprite], p.x, p.y);
     },
     kill: function() {
-      this.dead = true;
+      var p = this,
+          i = 8;
+      p.dead = true;
       tally.lives--;
-      this.shot.fired = this.cannon.armed = this.cannon.fired = false;
-      var i = 8;
+      p.shot.fired = p.cannon.armed = p.cannon.fired = false;
       var flash = function() {
-        this.current_sprite >= 6 ? this.current_sprite -= 6 : this.current_sprite += 2;
+        p.current_sprite >= 6 ? p.current_sprite -= 6 : p.current_sprite += 2;
         if (i > 0) {
           i--;
           var q = setTimeout(function() { flash.apply(player); }, 68);
         }
         else {
-          this.dead = false;
-          this.current_sprite = 6;
-          this.x = 40;
-          this.y = (canvas.height - 32) / 2;
+          p.dead = false;
+          p.current_sprite = 6;
+          p.x = 40;
+          p.y = (canvas.height - 32) / 2;
           enemy.shot.x = canvas.width - 90;
           enemy.shot.y = canvas.height / 2;
           enemy.qotile.x = canvas.width - enemy.qotile.width - 5;
@@ -264,7 +265,7 @@ $(function() {
           score();
         }
       };
-      flash.apply(this);
+      flash.apply(p);
     },
     checkCollision: function() {
       var p = this,
@@ -307,26 +308,27 @@ $(function() {
         attacking: false,
         next_attack: 80 + Math.floor(Math.random() * 150),
         draw: function() {
-          ctx.drawImage(this.sprite, 0, (enemy.qotile.countdown % 4 > 1 ? 0 : 32), 32, 32, enemy.qotile.x, enemy.qotile.y + 2, 32, 32);
-          if (!this.attacking) {
+          var s = this;
+          ctx.drawImage(s.sprite, 0, (enemy.qotile.countdown % 4 > 1 ? 0 : 32), 32, 32, enemy.qotile.x, enemy.qotile.y + 2, 32, 32);
+          if (!s.attacking) {
             enemy.qotile.countdown--;
           }
           else if (enemy.qotile.x > 0) {
             enemy.qotile.x -= 16;
-            enemy.qotile.y -= this.y_change;
+            enemy.qotile.y -= s.y_change;
           }
           else {
-            this.attacking = false;
-            this.swirling = false;
-            this.next_attack = 100 + Math.floor(Math.random() * 200);
-            enemy.qotile.countdown = this.next_attack;
+            s.attacking = false;
+            s.swirling = false;
+            s.next_attack = 100 + Math.floor(Math.random() * 200);
+            enemy.qotile.countdown = s.next_attack;
             enemy.qotile.x = canvas.width - enemy.qotile.width - 5;
             enemy.qotile.y = enemy.barrier.y + (enemy.barrier.height / 2 - enemy.qotile.height / 2);
           }
-          if (enemy.qotile.countdown === 0 && !this.attacking) {
-            this.attacking = true;
-            this.y_change = Math.sqrt(Math.pow(+(enemy.qotile.y - player.y), 2) + Math.pow(enemy.qotile.x - player.x + player.width, 2)) / (canvas.height / 2);
-            if (enemy.qotile.y - player.y < 0) { this.y_change = -this.y_change; }
+          if (enemy.qotile.countdown === 0 && !s.attacking) {
+            s.attacking = true;
+            s.y_change = Math.sqrt(Math.pow(+(enemy.qotile.y - player.y), 2) + Math.pow(enemy.qotile.x - player.x + player.width, 2)) / (canvas.height / 2);
+            if (enemy.qotile.y - player.y < 0) { s.y_change = -s.y_change; }
           }
         },
         checkCollision: function() {
@@ -374,29 +376,30 @@ $(function() {
       points: 69,
       chomp_points: 169,
       initMatrix: function() {
+        var b = this;
         for (var i = 0; i < 16; i++) {
-          this.matrix[i] = [];
+          b.matrix[i] = [];
           for (var q = 0; q < 8; q++) {
-            this.matrix[i][q] = 0;
+            b.matrix[i][q] = 0;
           }
         }
-        for (var i = 4; i < 8; i++) { this.matrix[0][i] = 1; }
-        for (var i = 3; i < 8; i++) { this.matrix[1][i] = 1; }
-        for (var i = 2; i < 8; i++) { this.matrix[2][i] = 1; }
-        for (var i = 1; i < 7; i++) { this.matrix[3][i] = 1; }
-        for (var i = 0; i < 6; i++) { this.matrix[4][i] = 1; }
-        for (var i = 0; i < 5; i++) { this.matrix[5][i] = 1; }
+        for (var i = 4; i < 8; i++) { b.matrix[0][i] = 1; }
+        for (var i = 3; i < 8; i++) { b.matrix[1][i] = 1; }
+        for (var i = 2; i < 8; i++) { b.matrix[2][i] = 1; }
+        for (var i = 1; i < 7; i++) { b.matrix[3][i] = 1; }
+        for (var i = 0; i < 6; i++) { b.matrix[4][i] = 1; }
+        for (var i = 0; i < 5; i++) { b.matrix[5][i] = 1; }
         for (var i = 0; i < 4; i++) {
           for (var q = 0; q < 4; q++) {
-            this.matrix[i + 6][q] = 1;
+            b.matrix[i + 6][q] = 1;
           }
         }
-        for (var i = 0; i < 5; i++) { this.matrix[10][i] = 1; }
-        for (var i = 0; i < 6; i++) { this.matrix[11][i] = 1; }
-        for (var i = 1; i < 7; i++) { this.matrix[12][i] = 1; }
-        for (var i = 2; i < 8; i++) { this.matrix[13][i] = 1; }
-        for (var i = 3; i < 8; i++) { this.matrix[14][i] = 1; }
-        for (var i = 4; i < 8; i++) { this.matrix[15][i] = 1; }
+        for (var i = 0; i < 5; i++) { b.matrix[10][i] = 1; }
+        for (var i = 0; i < 6; i++) { b.matrix[11][i] = 1; }
+        for (var i = 1; i < 7; i++) { b.matrix[12][i] = 1; }
+        for (var i = 2; i < 8; i++) { b.matrix[13][i] = 1; }
+        for (var i = 3; i < 8; i++) { b.matrix[14][i] = 1; }
+        for (var i = 4; i < 8; i++) { b.matrix[15][i] = 1; }
       },
       checkCollision: function() {
         var p = player;
@@ -460,22 +463,24 @@ $(function() {
       y: canvas.height / 2,
       speed: 1,
       draw: function() {
+        var s = this;
         ctx.fillStyle = enemy.qotile.color;
         ctx.globalCompositeOperation = "lighter";
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-        this.x -= (player.x < this.x) ? this.speed : -this.speed;
-        this.y -= (player.y + player.height / 2 < this.y) ? this.speed : -this.speed;
+        ctx.fillRect(s.x, s.y, s.width, s.height);
+        s.x -= (player.x < s.x) ? s.speed : -s.speed;
+        s.y -= (player.y + player.height / 2 < s.y) ? s.speed : -s.speed;
         ctx.globalCompositeOperation = "source-over";
-        this.checkCollision();
+        s.checkCollision();
       },
       checkCollision: function() {
         var p = player,
-            f = forcefield;
+            f = forcefield,
+            s = this;
         if (!p.dead) {
           if (!((p.x > f.x && p.x < f.x + f.width) || (p.x + p.width > f.x && p.x + p.width < f.x + f.width))) {
-            if (this.x < p.x + p.width &&
-              this.x + this.width > p.x && this.y < p.y + p.height &&
-              this.y + this.height > p.y) {
+            if (s.x < p.x + p.width &&
+              s.x + s.width > p.x && s.y < p.y + p.height &&
+              s.y + s.height > p.y) {
                 p.kill();
             }
           }
@@ -483,26 +488,28 @@ $(function() {
       }
     },
     moveBase: function() {
-      if (this.barrier.dir === "d") {
-        if (this.barrier.y < canvas.height / 2 - 92) {
-          this.barrier.y += 2;
-          if (!this.qotile.swirl.attacking) { this.qotile.y += 2; }
+      var b = this.barrier,
+          q = this.qotile;
+      if (b.dir === "d") {
+        if (b.y < canvas.height / 2 - 92) {
+          b.y += 2;
+          if (!q.swirl.attacking) { q.y += 2; }
         }
         else {
-          this.barrier.y -= 2;
-          if (!this.qotile.swirl.attacking) { this.qotile.y -= 2; }
-          this.barrier.dir = "u";
+          b.y -= 2;
+          if (!q.swirl.attacking) { q.y -= 2; }
+          b.dir = "u";
         }
       }
       else {
-        if (this.barrier.y > canvas.height / 2 - 164) {
-          this.barrier.y -= 2;
-          if (!this.qotile.swirl.attacking) { this.qotile.y -= 2; }
+        if (b.y > canvas.height / 2 - 164) {
+          b.y -= 2;
+          if (!q.swirl.attacking) { q.y -= 2; }
         }
         else {
-          this.barrier.y += 2;
-          if (!this.qotile.swirl.attacking) { this.qotile.y += 2; }
-          this.barrier.dir = "d";
+          b.y += 2;
+          if (!q.swirl.attacking) { q.y += 2; }
+          b.dir = "d";
         }
       }
     },
@@ -601,12 +608,12 @@ $(function() {
     drawNumbers(score);
     y += 52;
     drawNumbers(lives);
-    $(document).bind("keypress.next_round", function(e) {
+    $(document).bind("keyup.next_round", function(e) {
       if (tally.lives === 0) {
         resetGame();
       }
       this.game_started = true;
-      $(this).unbind("keypress.next_round");
+      $(this).unbind("keyup.next_round");
       game = setInterval(function() { run(); }, 34);
     });
   }
@@ -632,10 +639,10 @@ $(function() {
       ctx.drawImage(this, canvas.width / 2 - 80, 92);
     };
     document.game_started = false;
-    $(document).bind("keydown.start_game", function(e) {
+    $(document).bind("keyup.start_game", function(e) {
       if (e.keyCode === 32) {
         this.game_started = true;
-        $(this).unbind("keydown.start_game");
+        $(this).unbind("keyup.start_game");
         game = setInterval(function() { run(); }, 34);
       }
     });
