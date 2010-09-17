@@ -146,7 +146,8 @@ $(function() {
       checkCollision: function() {
         var c = this,
             b = enemy.barrier,
-            q = enemy.qotile;
+            q = enemy.qotile,
+            p = player;
         if (c.y >= q.y && c.y + c.height <= q.y + q.height) {
           if (c.x + c.width >= q.x) {
             if (!q.swirl.swirling) {
@@ -181,6 +182,11 @@ $(function() {
                 c.fired = c.armed = false;
               }
             }
+          }
+        }
+        if ((c.y >= p.y && c.y <= p.y + p.height) || (c.y + c.height >= p.y && c.y + c.height <= p.y + p.height)) {
+          if (c.x + c.width >= p.x && !p.dead) {
+            p.kill();
           }
         }
       }
@@ -470,14 +476,15 @@ $(function() {
       }
     },
     draw: function() {
-      if (this.qotile.swirl.swirling) {
-        this.qotile.swirl.draw();
-        this.qotile.swirl.checkCollision();
+      var e = this;
+      if (e.qotile.swirl.swirling) {
+        e.qotile.swirl.draw();
+        e.qotile.swirl.checkCollision();
       }
-      else { this.qotile.draw(); }
-      this.barrier.draw();
-      this.moveBase();
-      this.shot.draw();
+      else { e.qotile.draw(); }
+      e.barrier.draw();
+      e.moveBase();
+      e.shot.draw();
     }
   };
   enemy.qotile.x = canvas.width - enemy.qotile.width - 5;
