@@ -325,7 +325,7 @@ $(function() {
           }
           if (enemy.qotile.countdown === 0 && !this.attacking) {
             this.attacking = true;
-            this.y_change = Math.sqrt(Math.pow(+(enemy.qotile.y - player.y), 2) + Math.pow(enemy.qotile.x - player.x, 2)) / enemy.qotile.x;
+            this.y_change = Math.sqrt(Math.pow(+(enemy.qotile.y - player.y), 2) + Math.pow(enemy.qotile.x - player.x + player.width, 2)) / (canvas.height / 2);
             if (enemy.qotile.y - player.y < 0) { this.y_change = -this.y_change; }
           }
         },
