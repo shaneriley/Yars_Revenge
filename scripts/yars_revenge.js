@@ -144,29 +144,43 @@ $(function() {
         if (c.fired) { c.checkCollision(); }
       },
       checkCollision: function() {
+        var c = this;
+        c.checkQotileCollision();
+        c.checkBarrierCollision();
+        c.checkPlayerCollision();
+      },
+      checkQotileCollision: function() {
         var c = this,
-            b = enemy.barrier,
-            q = enemy.qotile,
-            p = player;
-        if (c.y >= q.y && c.y + c.height <= q.y + q.height) {
-          if (c.x + c.width >= q.x) {
+            q = enemy.qotile;
+        if ((c.y >= q.y && c.y <= q.y + q.height) || (c.y + c.height >= q.y && c.y + c.height <= q.y + q.height)) {
+          if (c.x + c.width >= q.x && c.x <= q.x + q.width) {
             if (!q.swirl.swirling) {
               tally.score += q.points;
             }
             else {
-              tally.score += q.swirl.attacking ? q.swirl.airborne_points : q.swirl.points;
+              if (q.swirl.attacking) {
+                tally.score += q.swirl.airborne_points;
+                tally.lives++;
+              }
+              else { q.swirl.points; }
             }
             player.shot.fired = q.swirl.swirling = q.swirl.attacking = c.armed = c.fired = false;
             player.x = 40;
             player.y = (canvas.height - 32) / 2;
             player.current_sprite = 6;
-            b.initMatrix();
+            enemy.barrier.initMatrix();
             enemy.shot.x = canvas.width - 90;
             enemy.shot.y = canvas.height / 2;
-            q.swirl.next_attack = 80 + Math.floor(Math.random() * 150);
+            q.swirl.next_attack = q.countdown = 80 + Math.floor(Math.random() * 150);
+            q.x = canvas.width - q.width - 5;
+            q.y = enemy.barrier.y + (enemy.barrier.height / 2 - q.height / 2);
             score();
           }
         }
+      },
+      checkBarrierCollision: function() {
+        var c = this,
+            b = enemy.barrier;
         if (c.y >= b.y && c.y + c.height <= b.y + b.height) {
           if (c.x + c.width >= b.x) {
             var x = c.x + c.width - b.x,
@@ -184,8 +198,12 @@ $(function() {
             }
           }
         }
+      },
+      checkPlayerCollision: function() {
+        var c = this,
+            p = player;
         if ((c.y >= p.y && c.y <= p.y + p.height) || (c.y + c.height >= p.y && c.y + c.height <= p.y + p.height)) {
-          if (c.x + c.width >= p.x && !p.dead) {
+          if (c.x + c.width >= p.x && c.x <= p.x + p.width && !p.dead) {
             p.kill();
           }
         }
