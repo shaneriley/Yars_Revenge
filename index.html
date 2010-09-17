@@ -4,20 +4,26 @@
   <title>Yars' Revenge</title>
   <meta charset="UTF-8">
   <script src="scripts/jquery-1.4.2.min.js"></script>
-  <script src="scripts/yars_revenge.js" type="text/javascript"></script>
-  <style>
-    #output {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 1;
-      font: normal 14px monospace;
-      color: #333333;
-    }
-  </style>
+  <script src="scripts/yars_revenge.js"></script>
+  <link rel="stylesheet" href="stylesheets/common.css" />
 </head>
 <body>
-  <canvas width="640" height="400"></canvas>
-  <div id="output"></div>
+  <section>
+    <h1>Yars' Revenge Canvas Remake</h1>
+    <canvas width="640" height="400"></canvas>
+    <article>
+      <h1>Controls:</h1>
+      <dl>
+        <dt>Move:</dt>
+        <dd>arrow keys</dd>
+        <dt>Shoot/start round:</dt>
+        <dd>spacebar</dd>
+        <dt>Pause:</dt>
+        <dd>p</dd>
+      </dl>
+    </article>
+    <p>After playing around with canvas for a little while, I was thinking it would be a perfect means to recreate classic Atari games with and wanted to start with what I think is the best game for the 2600. What I didn't realize was how much there was to that game, relative to other 2600 games. What looked to be the most troublesome things to recreate were the forcefield and the "warp field" that you see when you kill a Qotile (enemy base). The former was done with a massive set of screenshots of the forcefield randomly placed on the canvas rather than eat up a lot of processor generating both random lines and colors for it at 30FPS. The latter I opted not to add in because it wasn't required to play the game, however it would certainly be nice to add in sometime in the future. There's also no sound, primarily because I don't have a good method of ripping the sounds from the game separately because of the constant white noise playing behind the other sounds.</p>
+    <p>For more info on the original game, check out the <a rel="external" href="http://en.wikipedia.org/wiki/Yars_Revenge">Wikipedia article</a>.</p>
+  </section>
 </body>
 </html>
