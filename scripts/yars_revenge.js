@@ -165,9 +165,11 @@ $(function() {
               else { q.swirl.points; }
             }
             player.shot.fired = q.swirl.swirling = q.swirl.attacking = c.armed = c.fired = false;
+            c.x = c.y = 0;
             player.x = 40;
             player.y = (canvas.height - 32) / 2;
             player.current_sprite = 6;
+            enemy.barrier.stage = (enemy.barrier.stage) ? 0 : 1;
             enemy.barrier.initMatrix();
             enemy.shot.x = canvas.width - 90;
             enemy.shot.y = canvas.height / 2;
@@ -375,31 +377,35 @@ $(function() {
       matrix: [],
       points: 69,
       chomp_points: 169,
+      stage: 0,
+      shift: false,
       initMatrix: function() {
         var b = this;
         for (var i = 0; i < 16; i++) {
           b.matrix[i] = [];
           for (var q = 0; q < 8; q++) {
-            b.matrix[i][q] = 0;
+            b.matrix[i][q] = b.stage ? 1 : 0;
           }
         }
-        for (var i = 4; i < 8; i++) { b.matrix[0][i] = 1; }
-        for (var i = 3; i < 8; i++) { b.matrix[1][i] = 1; }
-        for (var i = 2; i < 8; i++) { b.matrix[2][i] = 1; }
-        for (var i = 1; i < 7; i++) { b.matrix[3][i] = 1; }
-        for (var i = 0; i < 6; i++) { b.matrix[4][i] = 1; }
-        for (var i = 0; i < 5; i++) { b.matrix[5][i] = 1; }
-        for (var i = 0; i < 4; i++) {
-          for (var q = 0; q < 4; q++) {
-            b.matrix[i + 6][q] = 1;
+        if (!b.stage) {
+          for (var i = 4; i < 8; i++) { b.matrix[0][i] = 1; }
+          for (var i = 3; i < 8; i++) { b.matrix[1][i] = 1; }
+          for (var i = 2; i < 8; i++) { b.matrix[2][i] = 1; }
+          for (var i = 1; i < 7; i++) { b.matrix[3][i] = 1; }
+          for (var i = 0; i < 6; i++) { b.matrix[4][i] = 1; }
+          for (var i = 0; i < 5; i++) { b.matrix[5][i] = 1; }
+          for (var i = 0; i < 4; i++) {
+            for (var q = 0; q < 4; q++) {
+              b.matrix[i + 6][q] = 1;
+            }
           }
+          for (var i = 0; i < 5; i++) { b.matrix[10][i] = 1; }
+          for (var i = 0; i < 6; i++) { b.matrix[11][i] = 1; }
+          for (var i = 1; i < 7; i++) { b.matrix[12][i] = 1; }
+          for (var i = 2; i < 8; i++) { b.matrix[13][i] = 1; }
+          for (var i = 3; i < 8; i++) { b.matrix[14][i] = 1; }
+          for (var i = 4; i < 8; i++) { b.matrix[15][i] = 1; }
         }
-        for (var i = 0; i < 5; i++) { b.matrix[10][i] = 1; }
-        for (var i = 0; i < 6; i++) { b.matrix[11][i] = 1; }
-        for (var i = 1; i < 7; i++) { b.matrix[12][i] = 1; }
-        for (var i = 2; i < 8; i++) { b.matrix[13][i] = 1; }
-        for (var i = 3; i < 8; i++) { b.matrix[14][i] = 1; }
-        for (var i = 4; i < 8; i++) { b.matrix[15][i] = 1; }
       },
       checkCollision: function() {
         var p = player;
@@ -490,6 +496,24 @@ $(function() {
     moveBase: function() {
       var b = this.barrier,
           q = this.qotile;
+      if (b.stage) {
+        if (b.shift) {
+          var mover = b.matrix[0].pop();
+          for (var y = 1, len_y = b.matrix.length; y < len_y; y++) {
+            if (y % 2) {
+              b.matrix[y].push(mover);
+              mover = b.matrix[y].shift();
+            }
+            else {
+              b.matrix[y].unshift(mover);
+              mover = b.matrix[y].pop();
+            }
+          }
+          b.matrix[0].unshift(mover);
+          b.shift = false;
+        }
+        else { b.shift = true; }
+      }
       if (b.dir === "d") {
         if (b.y < canvas.height / 2 - 92) {
           b.y += 2;
@@ -515,12 +539,12 @@ $(function() {
     },
     draw: function() {
       var e = this;
+      e.barrier.draw();
       if (e.qotile.swirl.swirling) {
         e.qotile.swirl.draw();
         e.qotile.swirl.checkCollision();
       }
       else { e.qotile.draw(); }
-      e.barrier.draw();
       e.moveBase();
       e.shot.draw();
     }
